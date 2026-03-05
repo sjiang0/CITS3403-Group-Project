@@ -1,0 +1,3 @@
+def favouriteFruits():
+    return "Mango"
+
