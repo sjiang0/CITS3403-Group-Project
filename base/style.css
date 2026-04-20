@@ -154,6 +154,12 @@ img { max-width: 100%; display: block; }
   max-width: calc(100vw - var(--sidebar-width));
 }
 
+.app {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;  /* ADD THIS */
+}
+
 /* ── 06. SIDEBAR BRAND ─────────────────────────────────── */
 .sidebar-brand {
   padding: 1.25rem 1rem;
