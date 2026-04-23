@@ -1,0 +1,17 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+application-env/
+
+# Flask instance/data (if any later)
+instance/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/

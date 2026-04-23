@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Study Quest{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="m-0 font-sans">
+
+<div class="flex min-h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="w-64 border-r border-black p-5 flex flex-col justify-evenly">
+
+    <!-- LOGO -->
+    <div>
+      <h2 class="text-xl font-bold">Study Quest</h2>
+    </div>
+
+    <!-- NAV -->
+    <div>
+      <nav class="space-y-2">
+        <a href="{{ url_for('dashboard') }}" class="block">Dashboard</a>
+        <a href="{{ url_for('my_quests') }}" class="block">My Quests</a>
+        <a href="#" class="block">Leaderboard</a>
+        <a href="#" class="block">Profile</a>
+      </nav>
+    </div>
+
+    <!-- USER INFO -->
+    <div>
+      <p><strong>Username</strong></p>
+      <p>Level 3</p>
+      <p>120 / 200 XP</p>
+    </div>
+
+    <div>
+      <button class="border border-black px-3 py-1">Logout</button>
+    </div>
+
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 p-8 max-w-3xl mx-auto">
+
+    <!-- FLOATING BUTTON -->
+    <div class="fixed top-5 right-5">
+      <a href="{{ url_for('create_quest') }}"
+         class="border border-black px-3 py-1 inline-block">
+        + NEW QUEST
+      </a>
+    </div>
+
+    <!-- PAGE-SPECIFIC CONTENT GOES HERE -->
+    {% block content %}{% endblock %}
+
+  </main>
+
+</div>
+
+</body>
+</html>

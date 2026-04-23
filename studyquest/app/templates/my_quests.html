@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}My Quests - Study Quest{% endblock %}
+
+{% block content %}
+
+<!-- FLOATING BUTTON -->
+<div class="fixed top-5 right-5">
+  <a href="{{ url_for('create_quest') }}"
+     class="border border-black px-3 py-1 inline-block">
+    + NEW QUEST
+  </a>
+</div>
+
+<h2 class="text-2xl font-bold mb-6">My Quests</h2>
+
+<!-- QUEST STATS -->
+<section class="border border-black p-4 mb-5">
+  <h3 class="font-bold mb-3">Quest Stats</h3>
+  <div class="flex justify-between text-sm">
+    <p>Total: <strong>12</strong></p>
+    <p>Active: <strong>6</strong></p>
+    <p>Completed: <strong>5</strong></p>
+    <p>Overdue: <strong>1</strong></p>
+  </div>
+</section>
+
+<!-- FILTERS -->
+<section class="border border-black p-4 mb-5">
+  <h3 class="font-bold mb-2">Filter Quests</h3>
+
+  <div class="flex gap-2 flex-wrap">
+    <button class="border border-black px-2 py-1">All</button>
+    <button class="border border-black px-2 py-1">Active</button>
+    <button class="border border-black px-2 py-1">Completed</button>
+    <button class="border border-black px-2 py-1">Overdue</button>
+  </div>
+</section>
+
+<!-- OVERDUE QUESTS -->
+<section class="border border-black p-4 mb-5">
+  <h3 class="font-bold mb-3">Overdue Quests</h3>
+
+  <ul class="space-y-1">
+    <li>❌ Essay Draft — [Assignment] — [Medium] — Due: Yesterday</li>
+  </ul>
+</section>
+
+<!-- ACTIVE QUESTS -->
+<section class="border border-black p-4 mb-5">
+  <h3 class="font-bold mb-3">Active Quests</h3>
+
+  <ul class="space-y-1">
+    <li>Labwork — [Study] — [Easy] — Due: 22 Apr</li>
+    <li>Essay Draft — [Assignment] — [Medium] — Due: 25 Apr</li>
+    <li>Study for Midsem Test — [Exam Prep] — [Hard] — Due: 30 Apr</li>
+  </ul>
+</section>
+
+<!-- COMPLETED QUESTS -->
+<section class="border border-black p-4">
+  <h3 class="font-bold mb-3">Completed Quests</h3>
+
+  <ul class="space-y-1">
+    <li>✅ Weekly Quiz — [Study] — [Easy]</li>
+    <li>✅ Chapter 1 Revision — [Study] — [Easy]</li>
+    <li>✅ Flashcards Set 2 — [Study] — [Medium]</li>
+  </ul>
+</section>
+
+{% endblock %}

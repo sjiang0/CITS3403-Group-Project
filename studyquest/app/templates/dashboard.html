@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Study Quest{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+
+<!-- XP SECTION -->
+<section class="border border-black p-4 mb-5">
+  <p class="mb-2">Level 3</p>
+
+  <!-- XP BAR -->
+  <div class="border border-black h-3 w-full mb-2">
+    <div class="w-2/3 h-full bg-black"></div>
+  </div>
+
+  <p>120 / 200 XP</p>
+</section>
+
+<!-- PROGRESS SNAPSHOT -->
+<section class="border border-black p-4 mb-5">
+  <h3 class="font-bold mb-3">Progress Snapshot</h3>
+
+  <div class="grid grid-cols-2 gap-4 text-sm">
+
+    <p>📌 Completed this week: <strong>3</strong></p>
+    <p>🔥 Current streak: <strong>4 days</strong></p>
+    <p>🏆 Rank: <strong>#3</strong></p>
+    <p>📊 Completion rate: <strong>62%</strong></p>
+
+  </div>
+</section>
+
+<!-- ACTIVE QUESTS -->
+<section class="border border-black p-4">
+  <h3 class="font-bold mb-3">Active Quests</h3>
+
+  <ul class="space-y-1">
+    <li>Labwork — [Easy]</li>
+    <li>Essay draft — [Medium]</li>
+    <li>Study for midsem test — [Hard]</li>
+  </ul>
+</section>
+
+{% endblock %}
