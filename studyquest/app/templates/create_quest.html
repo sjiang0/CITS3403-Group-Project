@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Create Quest - Study Quest{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-4">Create Quest</h2>
+
+<section class="border border-black p-5">
+
+  <form>
+
+    <!-- QUEST TITLE -->
+    <div class="mb-4">
+      <label class="block mb-1">Quest Title</label>
+      <input type="text" class="w-full border border-black p-2">
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="mb-4">
+      <label class="block mb-1">Description</label>
+      <textarea class="w-full border border-black p-2"></textarea>
+    </div>
+
+    <!-- QUEST TYPE -->
+    <div class="mb-4">
+      <label class="block mb-1">Quest Type</label>
+      <select class="w-full border border-black p-2">
+        <option value="study">Study</option>
+        <option value="assignment">Assignment</option>
+        <option value="exam">Exam Prep</option>
+        <option value="personal">Personal</option>
+      </select>
+    </div>
+
+    <!-- DIFFICULTY -->
+    <div class="mb-4">
+      <label class="block mb-1">Difficulty</label>
+      <select class="w-full border border-black p-2">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+
+    <!-- DUE DATE -->
+    <div class="mb-5">
+      <label class="block mb-1">Due Date</label>
+      <input type="date" class="w-full border border-black p-2">
+    </div>
+
+    <!-- SUBMIT -->
+    <button class="border border-black px-4 py-2">
+      Create Quest
+    </button>
+
+  </form>
+
+</section>
+
+{% endblock %}

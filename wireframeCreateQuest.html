@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Quest - Study Quest</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="m-0 font-sans">
+
+<div class="flex min-h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="w-64 border-r border-black p-5 flex flex-col justify-evenly">
+
+    <div>
+      <h2 class="text-xl font-bold">Study Quest</h2>
+    </div>
+
+    <div>
+      <nav class="space-y-2">
+        <a href="wireframeDashboard.html" class="block">Dashboard</a>
+        <a href="wireframeMyQuests.html" class="block">My Quests</a>
+        <a href="#" class="block">Leaderboard</a>
+        <a href="#" class="block">Profile</a>
+      </nav>
+    </div>
+
+    <div>
+      <p><strong>Username</strong></p>
+      <p>Level 3</p>
+      <p>120 / 200 XP</p>
+    </div>
+
+    <div>
+      <button class="border border-black px-3 py-1">Logout</button>
+    </div>
+
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 p-8 max-w-3xl mx-auto">
+
+    <h2 class="text-2xl font-bold mb-4">Create Quest</h2>
+
+    <section class="border border-black p-5">
+
+      <form>
+
+        <!-- QUEST TITLE -->
+        <div class="mb-4">
+          <label class="block mb-1">Quest Title</label>
+          <input type="text" class="w-full border border-black p-2">
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="mb-4">
+          <label class="block mb-1">Description</label>
+          <textarea class="w-full border border-black p-2"></textarea>
+        </div>
+
+        <!-- QUEST TYPE (NEW) -->
+        <div class="mb-4">
+          <label class="block mb-1">Quest Type</label>
+          <select class="w-full border border-black p-2">
+            <option value="study">Study</option>
+            <option value="assignment">Assignment</option>
+            <option value="exam">Exam Prep</option>
+            <option value="personal">Personal</option>
+          </select>
+        </div>
+
+        <!-- DIFFICULTY -->
+        <div class="mb-4">
+          <label class="block mb-1">Difficulty</label>
+          <select class="w-full border border-black p-2">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+
+        <!-- DUE DATE -->
+        <div class="mb-5">
+          <label class="block mb-1">Due Date</label>
+          <input type="date" class="w-full border border-black p-2">
+        </div>
+
+        <!-- SUBMIT -->
+        <button class="border border-black px-4 py-2">
+          Create Quest
+        </button>
+
+      </form>
+
+    </section>
+
+  </main>
+
+</div>
+
+</body>
+</html>

@@ -3,77 +3,96 @@
 <head>
   <meta charset="UTF-8">
   <title>Study Quest - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body style="margin:0; font-family: Arial, sans-serif;">
+<body class="m-0 font-sans">
 
-<!-- CONTAINER -->
-<div style="display: flex; min-height: 100vh;">
+<div class="flex min-h-screen">
 
   <!-- SIDEBAR -->
-  <aside style="width: 250px; border-right: 1px solid black; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+  <aside class="w-64 border-r border-black p-5 flex flex-col justify-evenly">
 
+    <!-- LOGO -->
     <div>
-      <h2>Study Quest</h2>
+      <h2 class="text-xl font-bold">Study Quest</h2>
+    </div>
 
-      <!-- CREATE QUEST -->
-      <div style="margin-bottom: 20px;">
-        <button style="width: 100%;">+ Create Quest</button>
-      </div>
-
-      <!-- NAV -->
-      <nav>
-        <p>Dashboard</p>
-        <p>Quests</p>
-        <p>Leaderboard</p>
-        <p>Profile</p>
+    <!-- NAV -->
+    <div>
+      <nav class="space-y-2">
+        <a href="wireframeDashboard.html" class="block">Dashboard</a>
+        <a href="wireframeMyQuests.html" class="block">My Quests</a>
+        <a href="#" class="block">Leaderboard</a>
+        <a href="#" class="block">Profile</a>
       </nav>
     </div>
 
+    <!-- USER INFO -->
     <div>
-      <p>Logout</p>
+      <p><strong>Username</strong></p>
+      <p>Level 3</p>
+      <p>120 / 200 XP</p>
+    </div>
+
+    <div>
+      <button class="border border-black px-3 py-1">Logout</button>
     </div>
 
   </aside>
 
   <!-- MAIN CONTENT -->
-  <main style="flex: 1; padding: 30px; max-width: 900px; margin: auto;">
-          <!-- USER INFO -->
-      <div style="position:fixed; right:50px; top:50px; background-color: lighblue; margin:auto">
-        <p><strong>Username</strong></p>
-        <p>Level 3</p>
-        <p>120 / 200 XP</p>
-      </div>
+  <main class="flex-1 p-8 max-w-3xl mx-auto">
 
     <!-- FLOATING BUTTON -->
-    <div style="position: fixed; bottom: 20px; right: 20px;">
-      <button>+ Create Quest</button>
+    <div class="fixed top-5 right-5">
+      <a href="wireframeCreateQuest.html" class="border border-black px-3 py-1 inline-block">
+        + NEW QUEST
+      </a>
     </div>
 
-    <h2>Dashboard</h2>
+    <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
 
     <!-- XP SECTION -->
-    <section style="border: 1px solid black; padding: 15px; margin-bottom: 20px;">
-      <p>Level 3</p>
+    <section class="border border-black p-4 mb-5">
+      <p class="mb-2">Level 3</p>
 
       <!-- XP BAR -->
-      <div style="border: 1px solid black; height: 10px; width: 100%; margin: 10px 0;">
-        <div style="width: 66%; height: 100%; background: black;"></div>
+      <div class="border border-black h-3 w-full mb-2">
+        <div class="w-2/3 h-full bg-black"></div>
       </div>
 
       <p>120 / 200 XP</p>
     </section>
 
-    <!-- QUESTS -->
-    <section style="border: 1px solid black; padding: 15px; margin-bottom: 20px;">
-      <h3>Active Quests</h3>
+    <!-- PROGRESS SNAPSHOT -->
+    <section class="border border-black p-4 mb-5">
+      <h3 class="font-bold mb-3">Progress Snapshot</h3>
 
-      <ul>
+      <div class="grid grid-cols-2 gap-4 text-sm">
+
+        <p>📌 Completed this week: <strong>3</strong></p>
+
+        <p>🔥 Current streak: <strong>4 days</strong></p>
+
+        <p>🏆 Rank: <strong>#3</strong></p>
+
+        <p>📊 Completion rate: <strong>62%</strong></p>
+
+      </div>
+    </section>
+
+    <!-- ACTIVE QUESTS -->
+    <section class="border border-black p-4">
+      <h3 class="font-bold mb-3">Active Quests</h3>
+
+      <ul class="space-y-1">
         <li>Labwork — [Easy]</li>
         <li>Essay draft — [Medium]</li>
         <li>Study for midsem test — [Hard]</li>
       </ul>
     </section>
+
   </main>
 
 </div>
