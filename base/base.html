@@ -36,13 +36,13 @@
 
       <span class="nav-section-label">Adventure</span>
 
-      <a href="{{ url_for('main.cottage') }}"
-         class="nav-item {% if request.endpoint == 'main.cottage' %}active{% endif %}">
+      <a href="{{ url_for('main.dashboard') }}"
+         class="nav-item {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
         <span class="nav-icon" aria-hidden="true">🏡</span>
         <span>My Cottage</span>
       </a>
 
-      <a href="{{ url_for('main.tasks') }}"
+      <a href="#"
          class="nav-item {% if 'task' in (request.endpoint or '') %}active{% endif %}">
         <span class="nav-icon" aria-hidden="true">📜</span>
         <span>My Quests</span>
@@ -50,7 +50,7 @@
 
       <span class="nav-section-label">Community</span>
 
-      <a href="{{ url_for('grove.grove') }}"
+      <a href="#"
          class="nav-item {% if 'grove' in (request.endpoint or '') %}active{% endif %}">
         <span class="nav-icon" aria-hidden="true">🌷</span>
         <span>My Grove</span>
@@ -64,7 +64,7 @@
 
       <span class="nav-section-label">You</span>
 
-      <a href="{{ url_for('main.profile') }}"
+      <a href="#"
          class="nav-item {% if request.endpoint == 'main.profile' %}active{% endif %}">
         <span class="nav-icon" aria-hidden="true">🌸</span>
         <span>My Journal</span>
@@ -86,66 +86,7 @@
 
     {% endif %}
   </nav>
-
-  <!-- Character card (logged-in only) -->
-  {% if current_user.is_authenticated %}
-    <div class="sidebar-divider" role="separator"></div>
-
-    {# Class icon map #}
-    {% set class_icons = {'Harvester':'🌾','Dreamweaver':'✨','Wanderer':'🌷','Caretaker':'🌻'} %}
-
-    {# Level titles #}
-    {% set level_titles = {
-      1:'Tiny Sprout', 2:'Little Herb', 3:'Wildflower',
-      4:'Blooming Scholar', 5:'Keeper of the Grove', 6:'Petal Tender',
-      7:'Moonlit Scholar', 8:'Elder Bloom', 9:'Ancient Herbalist', 10:'Grand Herbalist'
-    } %}
-
-    {# XP thresholds #}
-    {% set thresholds = {1:0,2:100,3:250,4:500,5:1000,6:1800,7:2800,8:4000,9:5500,10:7500} %}
-
-    {% set cur_level = current_user.level | default(1) %}
-    {% set cur_xp    = current_user.xp    | default(0) %}
-    {% set next_lvl  = [cur_level + 1, 10] | min %}
-    {% set t_now  = thresholds[cur_level] %}
-    {% set t_next = thresholds[next_lvl] %}
-    {% set xp_pct = [(( (cur_xp - t_now) / (t_next - t_now) ) * 100) | round(1), 100] | min if (t_next - t_now) > 0 else 100 %}
-
-    <a href="{{ url_for('main.profile') }}" class="char-card"
-       aria-label="View profile — {{ current_user.character_name or current_user.username }}, Level {{ cur_level }}">
-      <div class="char-header">
-        <div class="char-avatar" aria-hidden="true">{{ class_icons.get(current_user.character_class, '🌸') }}</div>
-        <div class="char-info">
-          <div class="char-name">{{ current_user.character_name or current_user.username }}</div>
-          <div class="char-class">{{ current_user.character_class or 'Adventurer' }}</div>
-        </div>
-        <span class="char-level-badge" aria-label="Level {{ cur_level }}">Lv {{ cur_level }}</span>
-      </div>
-      <div class="xp-bar-container"
-           role="progressbar"
-           aria-valuemin="0" aria-valuemax="{{ t_next - t_now }}" aria-valuenow="{{ cur_xp - t_now }}"
-           aria-label="XP progress to next level">
-        <div class="xp-bar-fill" id="sidebar-xp-fill"
-             style="width:{{ xp_pct }}%"
-             data-xp="{{ cur_xp }}" data-level="{{ cur_level }}"></div>
-      </div>
-      <div class="xp-label">{{ cur_xp }} / {{ t_next }} XP · {{ level_titles.get(cur_level, 'Scholar') }}</div>
-    </a>
-
-    <div class="sidebar-bottom">
-      <a href="{{ url_for('auth.logout') }}" class="sidebar-logout">
-        <span aria-hidden="true">🚪</span>
-        <span>Back to the Garden</span>
-      </a>
-    </div>
-
-  {% else %}
-
-    <div class="sidebar-bottom">
-      <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-full">Begin Your Journey 🌸</a>
-    </div>
-
-  {% endif %}
+  
 
 </aside>
 
