@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Study Quest - Leaderboard</title>
+</head>
+
+<body style="margin:0; font-family: Arial, sans-serif;">
+
+<!-- CONTAINER -->
+<div style="display: flex; min-height: 100vh;">
+
+  <!-- SIDEBAR -->
+  <aside style="width: 250px; border-right: 1px solid black; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+
+    <div>
+      <h2>Study Quest</h2>
+
+      <!-- CREATE QUEST -->
+      <div style="margin-bottom: 20px;">
+        <button style="width: 100%;">+ Create Quest</button>
+      </div>
+
+      <!-- NAV -->
+      <nav>
+        <p><a href="wireframeDashboard.html">Dashboard</a></p>
+        <p>Quests</p>
+        <p><strong>Leaderboard</strong></p>
+        <p><a href="wireframeProfile.html">Profile</a></p>
+      </nav>
+    </div>
+
+    <div>
+      <p><a href="wireframeLogin.html">Logout</a></p>
+    </div>
+
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main style="flex: 1; padding: 30px; max-width: 900px; margin: auto;">
+
+    <h2>Leaderboard</h2>
+    <p>See who has the most XP across all questers.</p>
+
+    <!-- LEADERBOARD TABLE -->
+    <section style="border: 1px solid black; padding: 15px; margin-bottom: 20px;">
+
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 1px solid black;">
+            <th style="text-align: left; padding: 8px;">Rank</th>
+            <th style="text-align: left; padding: 8px;">Username</th>
+            <th style="text-align: left; padding: 8px;">Level</th>
+            <th style="text-align: left; padding: 8px;">XP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #ccc;">
+            <td style="padding: 8px;">1</td>
+            <td style="padding: 8px;"><a href="wireframeProfile.html">Fariya</a></td>
+            <td style="padding: 8px;">12</td>
+            <td style="padding: 8px;">2450</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #ccc;">
+            <td style="padding: 8px;">2</td>
+            <td style="padding: 8px;"><a href="wireframeProfile.html">Jacob</a></td>
+            <td style="padding: 8px;">9</td>
+            <td style="padding: 8px;">1680</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #ccc;">
+            <td style="padding: 8px;">3</td>
+            <td style="padding: 8px;"><a href="wireframeProfile.html">Synne</a></td>
+            <td style="padding: 8px;">8</td>
+            <td style="padding: 8px;">1420</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #ccc; background: #f0f0f0;">
+            <td style="padding: 8px;"><strong>4</strong></td>
+            <td style="padding: 8px;"><strong><a href="wireframeProfile.html">Nuowei (you)</a></strong></td>
+            <td style="padding: 8px;"><strong>7</strong></td>
+            <td style="padding: 8px;"><strong>1240</strong></td>
+          </tr>
+          <tr style="border-bottom: 1px solid #ccc;">
+            <td style="padding: 8px;">5</td>
+            <td style="padding: 8px;"><a href="wireframeProfile.html">Maria</a></td>
+            <td style="padding: 8px;">6</td>
+            <td style="padding: 8px;">980</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #ccc;">
+            <td style="padding: 8px;">6</td>
+            <td style="padding: 8px;"><a href="wireframeProfile.html">Diego</a></td>
+            <td style="padding: 8px;">6</td>
+            <td style="padding: 8px;">910</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #ccc;">
+            <td style="padding: 8px;">7</td>
+            <td style="padding: 8px;"><a href="wireframeProfile.html">Akira</a></td>
+            <td style="padding: 8px;">5</td>
+            <td style="padding: 8px;">780</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;">8</td>
+            <td style="padding: 8px;"><a href="wireframeProfile.html">Priya</a></td>
+            <td style="padding: 8px;">4</td>
+            <td style="padding: 8px;">610</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+</div>
+
+</body>
+</html>

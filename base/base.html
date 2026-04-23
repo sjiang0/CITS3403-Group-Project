@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}Study Quest{% endblock %} 🌸</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+          integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside id="sidebar" role="navigation" aria-label="Main navigation">
+
+  <!-- Brand -->
+  <a href="{{ url_for('main.cottage') if current_user.is_authenticated else url_for('main.index') }}"
+     class="sidebar-brand" aria-label="Study Quest home">
+    <span class="brand-icon" aria-hidden="true">🌸</span>
+    <div>
+      <div class="brand-name">Study Quest</div>
+      <div class="brand-tagline">bloom · grow · thrive</div>
+    </div>
+  </a>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    {% if current_user.is_authenticated %}
+
+      <span class="nav-section-label">Adventure</span>
+
+      <a href="{{ url_for('main.dashboard') }}"
+         class="nav-item {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+        <span class="nav-icon" aria-hidden="true">🏡</span>
+        <span>My Cottage</span>
+      </a>
+
+      <a href="#"
+         class="nav-item {% if 'task' in (request.endpoint or '') %}active{% endif %}">
+        <span class="nav-icon" aria-hidden="true">📜</span>
+        <span>My Quests</span>
+      </a>
+
+      <span class="nav-section-label">Community</span>
+
+      <a href="#"
+         class="nav-item {% if 'grove' in (request.endpoint or '') %}active{% endif %}">
+        <span class="nav-icon" aria-hidden="true">🌷</span>
+        <span>My Grove</span>
+      </a>
+
+      <a href="{{ url_for('main.leaderboard') }}"
+         class="nav-item {% if request.endpoint == 'main.leaderboard' %}active{% endif %}">
+        <span class="nav-icon" aria-hidden="true">🏆</span>
+        <span>Leaderboard</span>
+      </a>
+
+      <span class="nav-section-label">You</span>
+
+      <a href="#"
+         class="nav-item {% if request.endpoint == 'main.profile' %}active{% endif %}">
+        <span class="nav-icon" aria-hidden="true">🌸</span>
+        <span>My Journal</span>
+      </a>
+
+    {% else %}
+
+      <a href="{{ url_for('auth.login') }}"
+         class="nav-item {% if request.endpoint == 'auth.login' %}active{% endif %}">
+        <span class="nav-icon" aria-hidden="true">🔑</span>
+        <span>Log In</span>
+      </a>
+
+      <a href="{{ url_for('auth.signup') }}"
+         class="nav-item {% if request.endpoint == 'auth.signup' %}active{% endif %}">
+        <span class="nav-icon" aria-hidden="true">🌱</span>
+        <span>Sign Up</span>
+      </a>
+
+    {% endif %}
+  </nav>
+  
+
+</aside>
+
+<!-- Mobile sidebar backdrop -->
+<div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<main id="main-content" role="main">
+
+  <!-- Mobile topbar -->
+  <div class="mobile-topbar" id="mobile-topbar">
+    <button class="mobile-menu-btn" id="mobile-menu-btn"
+            aria-label="Open sidebar" aria-controls="sidebar" aria-expanded="false">☰</button>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <span style="font-size:1.1rem">🌸</span>
+      <span class="mobile-brand-text">Study Quest</span>
+    </div>
+    <div style="width:2rem" aria-hidden="true"></div>
+  </div>
+
+  <!-- Flash messages (from Flask) -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% set icons = {'success':'✅','error':'❌','warning':'⚠️','info':'ℹ️','message':'ℹ️'} %}
+      <div class="flash-container" id="flash-container" role="alert" aria-live="polite">
+        {% for category, message in messages %}
+          {% set cat = category if category in ['success','error','warning','info'] else 'info' %}
+          <div class="flash flash-{{ cat }}">
+            <span class="flash-icon" aria-hidden="true">{{ icons.get(category, 'ℹ️') }}</span>
+            <span class="flash-message">{{ message }}</span>
+            <button class="flash-close" onclick="dismissFlash(this)" aria-label="Dismiss">✕</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Page content -->
+  <div class="animate-in">
+    {% block content %}{% endblock %}
+  </div>
+
+</main>
+
+<!-- ═══ LEVEL-UP MODAL ═══ -->
+<div class="modal-overlay" id="levelup-modal"
+     role="dialog" aria-modal="true" aria-labelledby="levelup-heading" aria-hidden="true">
+  <div class="modal">
+    <div class="confetti-burst" id="confetti-burst" aria-hidden="true"></div>
+    <span class="levelup-icon float-anim" aria-hidden="true">🌸</span>
+    <div class="levelup-title" id="levelup-heading">You levelled up!</div>
+    <div class="levelup-level"      id="levelup-level-text">Level 2</div>
+    <div class="levelup-title-name" id="levelup-title-text">Little Herb</div>
+    <button class="btn btn-gold btn-lg" onclick="closeLevelUpModal()">Keep Blooming ✦</button>
+  </div>
+</div>
+
+<!-- ═══ GLOBAL JS ═══ -->
+<script>
+// Level / XP data (mirrors Python constants)
+const LEVEL_TITLES = {
+  1:'Tiny Sprout',    2:'Little Herb',         3:'Wildflower',
+  4:'Blooming Scholar',5:'Keeper of the Grove',6:'Petal Tender',
+  7:'Moonlit Scholar',8:'Elder Bloom',          9:'Ancient Herbalist',
+  10:'Grand Herbalist'
+};
+const XP_THRESHOLDS = {1:0,2:100,3:250,4:500,5:1000,6:1800,7:2800,8:4000,9:5500,10:7500};
+
+// ── CSRF for AJAX ────────────────────────────────────────
+$.ajaxSetup({
+  beforeSend: function(xhr, settings) {
+    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
+      const t = $('meta[name="csrf-token"]').attr('content');
+      if (t) xhr.setRequestHeader('X-CSRFToken', t);
+    }
+  }
+});
+
+// ── Flash helpers ────────────────────────────────────────
+function dismissFlash(btn) {
+  const $f = $(btn).closest('.flash');
+  $f.addClass('removing');
+  setTimeout(() => $f.remove(), 300);
+}
+setTimeout(function() {
+  $('.flash').each(function(i, el) {
+    setTimeout(() => { $(el).addClass('removing'); setTimeout(() => $(el).remove(), 300); }, i * 150);
+  });
+}, 5000);
+
+function showFlash(msg, cat) {
+  cat = cat || 'info';
+  const icons = {success:'✅', error:'❌', warning:'⚠️', info:'ℹ️'};
+  if (!$('#flash-container').length)
+    $('body').append('<div class="flash-container" id="flash-container" role="alert" aria-live="polite"></div>');
+  const $f = $('<div>').addClass('flash flash-' + cat).html(
+    '<span class="flash-icon">' + (icons[cat]||'ℹ️') + '</span>' +
+    '<span class="flash-message">' + $('<div>').text(msg).html() + '</span>' +
+    '<button class="flash-close" onclick="dismissFlash(this)">✕</button>'
+  ).hide().appendTo('#flash-container').fadeIn(150);
+  setTimeout(() => { $f.addClass('removing'); setTimeout(() => $f.remove(), 300); }, 5000);
+}
+
+// ── XP bar update after AJAX ─────────────────────────────
+function updateXpBar(newXp, newLevel) {
+  const cur  = XP_THRESHOLDS[newLevel]     || 0;
+  const next = XP_THRESHOLDS[newLevel + 1] || XP_THRESHOLDS[10];
+  const pct  = next > cur ? Math.min((newXp - cur) / (next - cur) * 100, 100) : 100;
+  $('#sidebar-xp-fill').css('width', pct.toFixed(1) + '%').data('xp', newXp).data('level', newLevel);
+  $('.char-card .xp-label').text(newXp + ' / ' + next + ' XP · ' + (LEVEL_TITLES[newLevel] || 'Scholar'));
+  $('.char-level-badge').text('Lv ' + newLevel);
+}
+
+// ── Level-up modal ───────────────────────────────────────
+function showLevelUpModal(level) {
+  $('#levelup-level-text').text('Level ' + level);
+  $('#levelup-title-text').text(LEVEL_TITLES[level] || 'Grand Scholar');
+  $('#levelup-modal').addClass('open').attr('aria-hidden', 'false');
+  spawnConfetti();
+  setTimeout(() => $('#levelup-modal .btn').focus(), 400);
+}
+function closeLevelUpModal() {
+  $('#levelup-modal').removeClass('open').attr('aria-hidden', 'true');
+}
+$('#levelup-modal').on('click', function(e) { if (e.target === this) closeLevelUpModal(); });
+$(document).on('keydown', function(e) { if (e.key === 'Escape') closeLevelUpModal(); });
+
+function spawnConfetti() {
+  const $c = $('#confetti-burst').empty();
+  const cols = ['#C24878','#F5C0D8','#9070B8','#C4A8E0','#5A9E80','#A8D0BC','#D4845A','#F0BEA0'];
+  for (let i = 0; i < 28; i++) {
+    $('<span>').css({
+      left: (Math.random() * 100) + '%', top: (Math.random() * 35) + '%',
+      background: cols[Math.floor(Math.random() * cols.length)],
+      animationDelay: (Math.random() * .5) + 's',
+      animationDuration: (.9 + Math.random() * .9) + 's'
+    }).appendTo($c);
+  }
+}
+
+// ── Task completion (AJAX) ───────────────────────────────
+function completeTask(taskId, callback) {
+  $.post('/tasks/' + taskId + '/complete', function(res) {
+    if (res.success) {
+      $('#task-' + taskId).addClass('complete');
+      $('#task-check-' + taskId).addClass('checked sparkle-pop').text('✓');
+      updateXpBar(res.new_xp, res.new_level);
+      if (res.levelled_up) setTimeout(() => showLevelUpModal(res.new_level), 450);
+      showFlash('+' + res.xp_earned + ' XP earned! 🌸', 'success');
+      if (typeof callback === 'function') callback(res);
+    } else {
+      showFlash(res.message || 'Something went wrong.', 'error');
+    }
+  }).fail(() => showFlash('Could not complete quest. Check connection.', 'error'));
+}
+
+// ── Grove quest (AJAX) ───────────────────────────────────
+function completeGroveQuest(questId, callback) {
+  $.post('/grove/quest/' + questId + '/complete', function(res) {
+    if (res.success) {
+      $('#grove-quest-progress-' + questId).css('width', res.progress_percent.toFixed(1) + '%');
+      $('#grove-quest-count-' + questId).text(res.completed + '/' + res.total);
+      if (res.quest_complete) {
+        $('#grove-quest-' + questId).addClass('complete');
+        showFlash('Grove quest complete! Everyone earns XP 🌷', 'success');
+        if (res.levelled_up) setTimeout(() => showLevelUpModal(res.new_level), 450);
+        updateXpBar(res.new_xp, res.new_level);
+      } else {
+        showFlash('Contribution recorded! (' + res.completed + '/' + res.total + ' done)', 'info');
+      }
+      if (typeof callback === 'function') callback(res);
+    } else {
+      showFlash(res.message || 'Something went wrong.', 'error');
+    }
+  });
+}
+
+// ── Difficulty chips ─────────────────────────────────────
+$(document).on('click', '.difficulty-chip', function() {
+  const $g = $(this).closest('.difficulty-chips');
+  $g.find('.difficulty-chip').removeClass('selected');
+  $(this).addClass('selected');
+  $g.closest('form, .card').find('input[name="difficulty"]').val($(this).data('difficulty'));
+});
+
+// ── Invite code copy ─────────────────────────────────────
+$(document).on('click', '.invite-code', function() {
+  const code = $(this).text().trim();
+  navigator.clipboard && navigator.clipboard.writeText(code)
+    .then(() => showFlash('Invite code copied! 🌸', 'success'))
+    .catch(() => showFlash('Select and copy manually', 'warning'));
+});
+
+// ── Mobile sidebar ───────────────────────────────────────
+$('#mobile-menu-btn').on('click', function() {
+  $('#sidebar').addClass('open');
+  $('#sidebar-overlay').addClass('active');
+  $(this).attr('aria-expanded', 'true');
+});
+function closeMobileSidebar() {
+  $('#sidebar').removeClass('open');
+  $('#sidebar-overlay').removeClass('active');
+  $('#mobile-menu-btn').attr('aria-expanded', 'false');
+}
+$('#sidebar-overlay').on('click', closeMobileSidebar);
+$('#sidebar .nav-item').on('click', function() { if (window.innerWidth <= 768) closeMobileSidebar(); });
+
+// ── Stagger animation ────────────────────────────────────
+$(function() {
+  $('.stagger-children > *').each(function(i) {
+    $(this).addClass('animate-in delay-' + Math.min(i + 1, 5));
+  });
+});
+</script>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

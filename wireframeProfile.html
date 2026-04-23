@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Study Quest - Profile</title>
+</head>
+
+<body style="margin:0; font-family: Arial, sans-serif;">
+
+<!-- CONTAINER -->
+<div style="display: flex; min-height: 100vh;">
+
+  <!-- SIDEBAR -->
+  <aside style="width: 250px; border-right: 1px solid black; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+
+    <div>
+      <h2>Study Quest</h2>
+
+      <!-- CREATE QUEST -->
+      <div style="margin-bottom: 20px;">
+        <button style="width: 100%;">+ Create Quest</button>
+      </div>
+
+      <!-- NAV -->
+      <nav>
+        <p><a href="wireframeDashboard.html">Dashboard</a></p>
+        <p>Quests</p>
+        <p><a href="wireframeLeaderboard.html">Leaderboard</a></p>
+        <p><strong>Profile</strong></p>
+      </nav>
+    </div>
+
+    <div>
+      <p><a href="wireframeLogin.html">Logout</a></p>
+    </div>
+
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main style="flex: 1; padding: 30px; max-width: 900px; margin: auto;">
+
+    <h2>Profile</h2>
+
+    <!-- USER INFO -->
+    <section style="border: 1px solid black; padding: 15px; margin-bottom: 20px;">
+      <h3>Username: Nuowei</h3>
+      <p><strong>Level:</strong> 7</p>
+      <p><strong>Total XP:</strong> 1240</p>
+      <p><strong>XP to next level:</strong> 360 XP (Level 8 at 1600 XP)</p>
+
+      <!-- XP BAR -->
+      <div style="border: 1px solid black; height: 10px; width: 100%; margin: 10px 0;">
+        <div style="width: 77%; height: 100%; background: black;"></div>
+      </div>
+    </section>
+
+    <!-- RECENTLY COMPLETED -->
+    <section style="border: 1px solid black; padding: 15px; margin-bottom: 20px;">
+      <h3>Recently Completed Quests</h3>
+
+      <ul>
+        <li>
+          <strong>Finish Agile Web assignment brief</strong> — [Hard] +50 XP
+          <br><small>Completed 2 hours ago</small>
+        </li>
+        <li>
+          <strong>Read chapter 5 of database textbook</strong> — [Medium] +25 XP
+          <br><small>Completed yesterday</small>
+        </li>
+        <li>
+          <strong>Review flashcards (30 min)</strong> — [Easy] +10 XP
+          <br><small>Completed yesterday</small>
+        </li>
+        <li>
+          <strong>Group study session with friends</strong> — [Hard, Party] +50 XP
+          <br><small>Completed 2 days ago</small>
+        </li>
+        <li>
+          <strong>Build leaderboard page mockup</strong> — [Medium] +25 XP
+          <br><small>Completed 3 days ago</small>
+        </li>
+      </ul>
+    </section>
+
+    <p><a href="wireframeLeaderboard.html">&larr; Back to leaderboard</a></p>
+
+  </main>
+
+</div>
+
+</body>
+</html>
