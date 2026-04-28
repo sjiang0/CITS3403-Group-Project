@@ -1,6 +1,8 @@
 from app import app
 from flask import render_template
 
+from app.mock_data import mock_quests  ## remove later
+
 @app.route("/")  # !! Change when login is properly implemented
 @app.route("/dashboard")
 def dashboard():
