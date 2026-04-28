@@ -50,31 +50,59 @@
 <!-- ACTIVE QUESTS -->
 <section class="border border-black p-4 mb-5">
   <h3 class="font-bold mb-3">Active Quests</h3>
-  <ul class="space-y-1">
-    {% for quest in active_quests %}
-      <li>
-        {{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}] 
-        {% if quest.due_date %}
-          — Due: {{ quest.due_date.strftime('%d %b') }}
-        {% else %}
-          — No due date
-        {% endif %}
-      </li>
-    {% else %}
-      <li>No active quests</li>
-    {% endfor %}
-  </ul>
+
+  <!-- Active quests with due dates -->
+  {% if active_quests_with_due_date %}
+    <h4 class="font-semibold mt-4">With Due Date</h4>
+    <ul class="space-y-1">
+      {% for quest in active_quests_with_due_date %}
+        <li>{{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}] — Due: {{ quest.due_date.strftime('%d %b') }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No active quests with a due date</p>
+  {% endif %}
+
+  <!-- Active quests with no due date -->
+  {% if active_quests_no_due_date %}
+    <h4 class="font-semibold mt-4">No Due Date</h4>
+    <ul class="space-y-1">
+      {% for quest in active_quests_no_due_date %}
+        <li>{{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}] — No due date</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No active quests without a due date</p>
+  {% endif %}
 </section>
+
 <!-- COMPLETED QUESTS -->
 <section class="border border-black p-4">
   <h3 class="font-bold mb-3">Completed Quests</h3>
-  <ul class="space-y-1">
-    {% for quest in completed_quests %}
-      <li>✅ {{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}]</li>
-    {% else %}
-      <li>No completed quests</li>
-    {% endfor %}
-  </ul>
+  
+  <!-- Completed quests with due dates -->
+  {% if completed_quests_with_due_date %}
+    <h4 class="font-semibold mt-4">With Due Date</h4>
+    <ul class="space-y-1">
+      {% for quest in completed_quests_with_due_date %}
+        <li>✅ {{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}] — Due: {{ quest.due_date.strftime('%d %b') }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No completed quests with a due date</p>
+  {% endif %}
+
+  <!-- Completed quests with no due date -->
+  {% if completed_quests_no_due_date %}
+    <h4 class="font-semibold mt-4">No Due Date</h4>
+    <ul class="space-y-1">
+      {% for quest in completed_quests_no_due_date %}
+        <li>✅ {{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}] — No due date</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No completed quests without a due date</p>
+  {% endif %}
 </section>
 
 {% endblock %}
