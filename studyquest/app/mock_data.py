@@ -23,5 +23,12 @@ mock_quests = [
         description="Revise lecture material",
         quest_type="exam",
         difficulty="hard"
+    ),
+    Quest(
+        id=4,
+        title="Group project",
+        description="Finish report section",
+        quest_type="assignment",
+        difficulty="medium"
     )
 ]
