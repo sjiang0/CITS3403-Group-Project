@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
+from datetime import date
 
 
 @dataclass
@@ -9,5 +10,6 @@ class Quest:
     description: str
     quest_type: str
     difficulty: str
-    due_date: Optional[str] = None
+    due_date: Optional[date] = None
     status: str = "In Progress"
+    date_completed: Optional[date] = None 
