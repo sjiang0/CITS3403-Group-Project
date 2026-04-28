@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from .models import Quest
 
 mock_quests = [
@@ -6,7 +7,8 @@ mock_quests = [
         title="Labwork",
         description="Complete weekly lab tasks",
         quest_type="study",
-        difficulty="easy"
+        difficulty="easy",
+        due_date=datetime.now() + timedelta(days=-1)  
     ),
 
     Quest(
@@ -14,7 +16,7 @@ mock_quests = [
         title="Essay draft",
         description="Write first essay draft",
         quest_type="assignment",
-        difficulty="medium"
+        difficulty="medium",
     ),
 
     Quest(
@@ -22,13 +24,16 @@ mock_quests = [
         title="Midsem revision",
         description="Revise lecture material",
         quest_type="exam",
-        difficulty="hard"
+        difficulty="hard",
+        due_date=datetime.now() + timedelta(days=2)  
     ),
+    
     Quest(
         id=4,
         title="Group project",
         description="Finish report section",
         quest_type="assignment",
-        difficulty="medium"
+        difficulty="medium",
+        due_date=datetime.now() + timedelta(days=10)  
     )
 ]

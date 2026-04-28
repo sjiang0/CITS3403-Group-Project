@@ -6,8 +6,7 @@
 
 <!-- FLOATING BUTTON -->
 <div class="fixed top-5 right-5">
-  <a href="{{ url_for('create_quest') }}"
-     class="border border-black px-3 py-1 inline-block">
+  <a href="{{ url_for('create_quest') }}" class="border border-black px-3 py-1 inline-block">
     + NEW QUEST
   </a>
 </div>
@@ -18,17 +17,16 @@
 <section class="border border-black p-4 mb-5">
   <h3 class="font-bold mb-3">Quest Stats</h3>
   <div class="flex justify-between text-sm">
-    <p>Total: <strong>12</strong></p>
-    <p>Active: <strong>6</strong></p>
-    <p>Completed: <strong>5</strong></p>
-    <p>Overdue: <strong>1</strong></p>
+    <p>Total: <strong>{{ total_quests }}</strong></p>
+    <p>Active: <strong>{{ active_count }}</strong></p>
+    <p>Completed: <strong>{{ completed_count }}</strong></p>
+    <p>Overdue: <strong>{{ overdue_count }}</strong></p>
   </div>
 </section>
 
 <!-- FILTERS -->
 <section class="border border-black p-4 mb-5">
   <h3 class="font-bold mb-2">Filter Quests</h3>
-
   <div class="flex gap-2 flex-wrap">
     <button class="border border-black px-2 py-1">All</button>
     <button class="border border-black px-2 py-1">Active</button>
@@ -40,31 +38,42 @@
 <!-- OVERDUE QUESTS -->
 <section class="border border-black p-4 mb-5">
   <h3 class="font-bold mb-3">Overdue Quests</h3>
-
   <ul class="space-y-1">
-    <li>❌ Essay Draft — [Assignment] — [Medium] — Due: Yesterday</li>
+    {% for quest in overdue_quests %}
+      <li>❌ {{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}] — Due: {{ quest.due_date.strftime('%d %b') }}</li>
+    {% else %}
+      <li>No overdue quests</li>
+    {% endfor %}
   </ul>
 </section>
 
 <!-- ACTIVE QUESTS -->
 <section class="border border-black p-4 mb-5">
   <h3 class="font-bold mb-3">Active Quests</h3>
-
   <ul class="space-y-1">
-    <li>Labwork — [Study] — [Easy] — Due: 22 Apr</li>
-    <li>Essay Draft — [Assignment] — [Medium] — Due: 25 Apr</li>
-    <li>Study for Midsem Test — [Exam Prep] — [Hard] — Due: 30 Apr</li>
+    {% for quest in active_quests %}
+      <li>
+        {{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}] 
+        {% if quest.due_date %}
+          — Due: {{ quest.due_date.strftime('%d %b') }}
+        {% else %}
+          — No due date
+        {% endif %}
+      </li>
+    {% else %}
+      <li>No active quests</li>
+    {% endfor %}
   </ul>
 </section>
-
 <!-- COMPLETED QUESTS -->
 <section class="border border-black p-4">
   <h3 class="font-bold mb-3">Completed Quests</h3>
-
   <ul class="space-y-1">
-    <li>✅ Weekly Quiz — [Study] — [Easy]</li>
-    <li>✅ Chapter 1 Revision — [Study] — [Easy]</li>
-    <li>✅ Flashcards Set 2 — [Study] — [Medium]</li>
+    {% for quest in completed_quests %}
+      <li>✅ {{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}]</li>
+    {% else %}
+      <li>No completed quests</li>
+    {% endfor %}
   </ul>
 </section>
 
