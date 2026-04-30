@@ -36,10 +36,14 @@
 <section class="border border-black p-4">
   <h3 class="font-bold mb-3">Active Quests</h3>
 
-  <ul class="space-y-1">
-    <li>Labwork — [Easy]</li>
-    <li>Essay draft — [Medium]</li>
-    <li>Study for midsem test — [Hard]</li>
+    <ul class="space-y-1">
+    {% for quest in quests %}
+      <li>
+        <strong>{{ quest.title }}</strong> — [{{ quest.difficulty }}]
+      </li>
+    {% else %}
+      <li>No active quests at the moment.</li>
+    {% endfor %}
   </ul>
 </section>
 
