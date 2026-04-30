@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Study Quest — Design Preview 🌸</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Playfair+Display+SC:wght@400;600&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* ── Preview chrome ── */
+.preview-shell {
+  background: #F0D8E8;
+  min-height: 100vh;
+  padding: 0;
+  font-family: 'Nunito', sans-serif;
+}
+.preview-topbar {
+  background: #2A1020;
+  padding: .625rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  border-bottom: 1px solid #3E1830;
+  flex-wrap: wrap;
+}
+.preview-tabs {
+  display: flex;
+  gap: .3rem;
+  flex-wrap: wrap;
+}
+.ptab {
+  padding: .3rem .85rem;
+  border-radius: 6px 6px 0 0;
+  font-size: .72rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-bottom: none;
+  color: #906080;
+  background: transparent;
+  font-family: 'Nunito', sans-serif;
+  transition: all .15s ease;
+  white-space: nowrap;
+}
+.ptab:hover { color: #E0B8D0; background: rgba(255,255,255,.05); }
+.ptab.active { background: #FFF0F8; color: #C24878; border-color: #F0B8D0; }
+.preview-url {
+  background: rgba(255,255,255,.07);
+  border-radius: 4px;
+  padding: .2rem .7rem;
+  font-size: .65rem;
+  color: #906080;
+  font-family: monospace;
+  margin-left: auto;
+}
+.preview-note {
+  font-size: .65rem;
+  color: #906080;
+  font-style: italic;
+  padding: .5rem 1.25rem;
+  background: rgba(194,72,120,.06);
+  border-bottom: 1px solid #F0B8D0;
+}
+
+/* ── Page containers ── */
+.preview-page { display: none; }
+.preview-page.active { display: block; }
+
+/* Each page uses the same .app layout so sidebar + main work */
+.app { display: flex; min-height: calc(100vh - 70px); }
+</style>
+</head>
+<body class="preview-shell">
+
+<!-- Preview chrome -->
+<div class="preview-topbar">
+  <div style="font-size:1.1rem;filter:drop-shadow(0 0 6px rgba(194,72,120,.6))">🌸</div>
+  <div style="font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:#FFF0F8">Study Quest</div>
+  <div class="preview-tabs">
+    <button class="ptab active" onclick="switchPage('dashboard',this,'localhost:5000/cottage')">🏡 Dashboard</button>
+    <button class="ptab" onclick="switchPage('quests',this,'localhost:5000/tasks')">📜 Quests</button>
+    <button class="ptab" onclick="switchPage('leaderboard',this,'localhost:5000/leaderboard')">🏆 Leaderboard</button>
+    <button class="ptab" onclick="switchPage('grove',this,'localhost:5000/grove')">🌷 Grove</button>
+    <button class="ptab" onclick="switchPage('profile',this,'localhost:5000/profile')">🌸 Journal</button>
+    <button class="ptab" onclick="switchPage('login',this,'localhost:5000/login')">🔑 Login</button>
+  </div>
+  <div class="preview-url" id="url-bar">localhost:5000/cottage</div>
+</div>
+<div class="preview-note">
+  ✦ This is a static design preview — open in any browser, no Flask needed. Tabs switch between all 6 pages. Interactive elements work (difficulty chips, task complete, flash messages, level-up modal).
+</div>
+
+<!-- Shared sidebar HTML (reused across all pages via JS) -->
+<template id="sidebar-tpl">
+<aside id="sidebar">
+  <a href="#" class="sidebar-brand">
+    <span class="brand-icon">🌸</span>
+    <div>
+      <div class="brand-name">Study Quest</div>
+      <div class="brand-tagline">bloom · grow · thrive</div>
+    </div>
+  </a>
+  <nav class="sidebar-nav" id="sidebar-nav-items">
+    <span class="nav-section-label">Adventure</span>
+    <a href="#" class="nav-item" data-page="dashboard"><span class="nav-icon">🏡</span> My Cottage</a>
+    <a href="#" class="nav-item" data-page="quests"><span class="nav-icon">📜</span> My Quests</a>
+    <span class="nav-section-label">Community</span>
+    <a href="#" class="nav-item" data-page="grove"><span class="nav-icon">🌷</span> My Grove</a>
+    <a href="#" class="nav-item" data-page="leaderboard"><span class="nav-icon">🏆</span> Leaderboard</a>
+    <span class="nav-section-label">You</span>
+    <a href="#" class="nav-item" data-page="profile"><span class="nav-icon">🌸</span> My Journal</a>
+  </nav>
+  <div class="sidebar-divider"></div>
+  <a href="#" class="char-card">
+    <div class="char-header">
+      <div class="char-avatar">✨</div>
+      <div class="char-info">
+        <div class="char-name">Lunara Voss</div>
+        <div class="char-class">Dreamweaver</div>
+      </div>
+      <span class="char-level-badge">Lv 4</span>
+    </div>
+    <div class="xp-bar-container" role="progressbar" aria-valuemin="0" aria-valuemax="500" aria-valuenow="380">
+      <div class="xp-bar-fill" id="sidebar-xp-fill" style="width:76%"></div>
+    </div>
+    <div class="xp-label">380 / 500 XP · Blooming Scholar</div>
+  </a>
+  <div class="sidebar-bottom">
+    <a href="#" class="sidebar-logout"><span>🚪</span> Back to the Garden</a>
+  </div>
+</aside>
+</template>
+
+<!-- ════════════════════════════════════════
+     PAGE: DASHBOARD
+════════════════════════════════════════ -->
+<div class="preview-page active" id="page-dashboard">
+<div class="app">
+  <div id="sb-dashboard"></div>
+  <main id="main-content">
+    <div class="animate-in">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Good evening, Lunara 🌙</h1>
+          <p class="page-subtitle">You have 3 active quests — keep blooming!</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-primary" onclick="switchPage('quests',null,'localhost:5000/tasks')">+ New Quest</button>
+        </div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="grid-stats stagger-children" style="margin-bottom:1.25rem">
+        <div class="stat-card"><span class="stat-icon">⚡</span><div class="stat-value">380</div><div class="stat-label">Bloom Points</div><div class="stat-bg">⚡</div></div>
+        <div class="stat-card"><span class="stat-icon">📜</span><div class="stat-value">12</div><div class="stat-label">Quests Done</div><div class="stat-bg">📜</div></div>
+        <div class="stat-card"><span class="stat-icon">🔥</span><div class="stat-value">7</div><div class="stat-label">Day Streak</div><div class="stat-bg">🔥</div></div>
+        <div class="stat-card"><span class="stat-icon">🏆</span><div class="stat-value">#3</div><div class="stat-label">Rank</div><div class="stat-bg">🏆</div></div>
+      </div>
+
+      <!-- XP Card -->
+      <div class="xp-card" style="margin-bottom:1.25rem">
+        <div class="xp-card-header">
+          <span class="xp-card-title">XP Progress</span>
+          <span class="badge badge-level">Level 4</span>
+        </div>
+        <div class="xp-big-bar"><div class="xp-big-fill" id="dash-xp-bar" style="width:76%"></div></div>
+        <div class="xp-bar-labels"><span>380 XP</span><span>120 XP to Level 5</span></div>
+      </div>
+
+      <!-- Active Quests -->
+      <div class="section-title">Active Quests</div>
+      <div class="grid-quests">
+
+        <div class="quest-item" data-difficulty="hard" id="task-1">
+          <button class="quest-check" id="task-check-1" onclick="demoComplete(1,200)" title="Mark complete">✓</button>
+          <div class="quest-body">
+            <div class="quest-title">Write essay draft — COMP3000</div>
+            <div class="quest-meta">
+              <span class="badge badge-hard">Hard</span>
+              <span class="tag">Due tomorrow</span>
+              <span class="badge badge-xp">+200 XP</span>
+            </div>
+          </div>
+          <div class="quest-actions">
+            <button class="btn btn-ghost btn-sm" style="font-size:.85rem" title="Edit">✏️</button>
+            <button class="btn btn-danger btn-sm" style="font-size:.85rem" title="Delete">🗑</button>
+          </div>
+        </div>
+
+        <div class="quest-item" data-difficulty="medium" id="task-2">
+          <button class="quest-check" id="task-check-2" onclick="demoComplete(2,100)" title="Mark complete">✓</button>
+          <div class="quest-body">
+            <div class="quest-title">Review lecture notes — MATH2050</div>
+            <div class="quest-meta">
+              <span class="badge badge-medium">Medium</span>
+              <span class="badge badge-xp">+100 XP</span>
+            </div>
+          </div>
+          <div class="quest-actions">
+            <button class="btn btn-ghost btn-sm" style="font-size:.85rem">✏️</button>
+            <button class="btn btn-danger btn-sm" style="font-size:.85rem">🗑</button>
+          </div>
+        </div>
+
+        <div class="quest-item" data-difficulty="easy" id="task-3">
+          <button class="quest-check" id="task-check-3" onclick="demoComplete(3,50)" title="Mark complete">✓</button>
+          <div class="quest-body">
+            <div class="quest-title">Read Chapter 4 — Biology</div>
+            <div class="quest-meta">
+              <span class="badge badge-easy">Easy</span>
+              <span class="tag">No deadline</span>
+              <span class="badge badge-xp">+50 XP</span>
+            </div>
+          </div>
+          <div class="quest-actions">
+            <button class="btn btn-ghost btn-sm" style="font-size:.85rem">✏️</button>
+            <button class="btn btn-danger btn-sm" style="font-size:.85rem">🗑</button>
+          </div>
+        </div>
+
+        <div class="quest-item complete" data-difficulty="easy">
+          <button class="quest-check checked">✓</button>
+          <div class="quest-body">
+            <div class="quest-title">Read the PRD</div>
+            <div class="quest-meta">
+              <span class="badge badge-easy">Easy</span>
+              <span class="badge badge-complete">Complete</span>
+              <span>+50 XP earned</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: QUESTS
+════════════════════════════════════════ -->
+<div class="preview-page" id="page-quests">
+<div class="app">
+  <div id="sb-quests"></div>
+  <main id="main-content">
+    <div class="animate-in">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">My Quests</h1>
+          <p class="page-subtitle">Track all your study tasks</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-primary">+ New Quest</button>
+        </div>
+      </div>
+
+      <!-- Create Quest Card -->
+      <div class="card card-moss card-flourish" style="margin-bottom:1.5rem">
+        <div class="section-title" style="margin-bottom:1rem">New Quest</div>
+        <div class="form-group">
+          <label class="form-label"><span>📜</span> Title</label>
+          <input type="text" class="form-input" placeholder="Write literature review…" value="Write literature review…">
+        </div>
+        <div class="two-col" style="gap:.875rem">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label"><span>📚</span> Subject</label>
+            <input type="text" class="form-input" value="ENGL2001">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label"><span>📅</span> Deadline</label>
+            <input type="date" class="form-input" style="border-color:#EB90B4;box-shadow:0 0 0 3px rgba(194,72,120,.12)">
+            <span class="form-hint">Focus state: petal border + ring</span>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:.875rem">
+          <label class="form-label"><span>⚔️</span> Difficulty</label>
+          <div class="difficulty-chips">
+            <div class="difficulty-chip" data-difficulty="easy">🌱 Easy &nbsp;+50 XP</div>
+            <div class="difficulty-chip selected" data-difficulty="medium">🌻 Medium &nbsp;+100 XP</div>
+            <div class="difficulty-chip" data-difficulty="hard">🔥 Hard &nbsp;+200 XP</div>
+          </div>
+          <input type="hidden" name="difficulty" value="medium">
+        </div>
+        <div style="margin-top:.25rem">
+          <button class="btn btn-primary" onclick="showFlash('Quest planted! +100 XP incoming 🌱','success')">Plant this Quest 🌱</button>
+        </div>
+      </div>
+
+      <!-- All Quests -->
+      <div class="section-title">All Quests</div>
+      <div class="grid-quests">
+        <div class="quest-item" data-difficulty="hard">
+          <button class="quest-check">✓</button>
+          <div class="quest-body">
+            <div class="quest-title">Write essay draft — COMP3000</div>
+            <div class="quest-meta"><span class="badge badge-hard">Hard</span><span class="tag">Due 14 Apr</span><span class="badge badge-xp">+200 XP</span></div>
+          </div>
+          <div class="quest-actions">
+            <button class="btn btn-ghost btn-sm" style="font-size:.85rem">✏️</button>
+            <button class="btn btn-danger btn-sm" style="font-size:.85rem">🗑</button>
+          </div>
+        </div>
+        <div class="quest-item" data-difficulty="medium">
+          <button class="quest-check">✓</button>
+          <div class="quest-body">
+            <div class="quest-title">Review lecture notes — MATH2050</div>
+            <div class="quest-meta"><span class="badge badge-medium">Medium</span><span class="badge badge-xp">+100 XP</span></div>
+          </div>
+          <div class="quest-actions">
+            <button class="btn btn-ghost btn-sm" style="font-size:.85rem">✏️</button>
+            <button class="btn btn-danger btn-sm" style="font-size:.85rem">🗑</button>
+          </div>
+        </div>
+        <div class="quest-item complete" data-difficulty="easy">
+          <button class="quest-check checked">✓</button>
+          <div class="quest-body">
+            <div class="quest-title">Read Chapter 4 — Biology</div>
+            <div class="quest-meta"><span class="badge badge-easy">Easy</span><span class="badge badge-complete">Complete</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: LEADERBOARD
+════════════════════════════════════════ -->
+<div class="preview-page" id="page-leaderboard">
+<div class="app">
+  <div id="sb-leaderboard"></div>
+  <main id="main-content">
+    <div class="animate-in">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Leaderboard</h1>
+          <p class="page-subtitle">Most devoted scholars</p>
+        </div>
+      </div>
+
+      <div class="your-rank-callout">
+        <span style="font-size:1.25rem">🌸</span>
+        <div>
+          <span class="rank-label">Your rank: </span>
+          <span class="rank-value">#3</span>
+          <span class="rank-label"> of 8 scholars</span>
+        </div>
+        <span class="badge badge-level" style="margin-left:auto">Lv 4</span>
+      </div>
+
+      <div class="leaderboard-list">
+        <div class="leaderboard-row rank-1">
+          <span class="rank-medal">🥇</span>
+          <div class="leaderboard-avatar">🌾</div>
+          <div class="leaderboard-user-info">
+            <div class="leaderboard-username">Jacob W.</div>
+            <div class="leaderboard-user-meta">Harvester · Level 6</div>
+          </div>
+          <span class="badge badge-level" style="margin-right:.375rem">Lv 6</span>
+          <div class="leaderboard-xp">1 840</div>
+        </div>
+
+        <div class="leaderboard-row rank-2">
+          <span class="rank-medal">🥈</span>
+          <div class="leaderboard-avatar">🌻</div>
+          <div class="leaderboard-user-info">
+            <div class="leaderboard-username">Nuowei C.</div>
+            <div class="leaderboard-user-meta">Caretaker · Level 5</div>
+          </div>
+          <span class="badge badge-level" style="margin-right:.375rem">Lv 5</span>
+          <div class="leaderboard-xp">1 200</div>
+        </div>
+
+        <div class="leaderboard-row rank-3 current-user">
+          <span class="rank-medal">🥉</span>
+          <div class="leaderboard-avatar">✨</div>
+          <div class="leaderboard-user-info">
+            <div class="leaderboard-username">Lunara <span style="font-size:.65rem;color:var(--honey);font-weight:700">(you)</span></div>
+            <div class="leaderboard-user-meta">Dreamweaver · Level 4</div>
+          </div>
+          <span class="badge badge-level" style="margin-right:.375rem">Lv 4</span>
+          <div class="leaderboard-xp">380</div>
+        </div>
+
+        <div class="leaderboard-row">
+          <span class="rank-number">4</span>
+          <div class="leaderboard-avatar">🍃</div>
+          <div class="leaderboard-user-info">
+            <div class="leaderboard-username">Synne O.</div>
+            <div class="leaderboard-user-meta">Wanderer · Level 3</div>
+          </div>
+          <span class="badge badge-level" style="margin-right:.375rem">Lv 3</span>
+          <div class="leaderboard-xp">290</div>
+        </div>
+
+        <div class="leaderboard-row">
+          <span class="rank-number">5</span>
+          <div class="leaderboard-avatar">🌷</div>
+          <div class="leaderboard-user-info">
+            <div class="leaderboard-username">Fariya A.</div>
+            <div class="leaderboard-user-meta">Caretaker · Level 2</div>
+          </div>
+          <span class="badge badge-level" style="margin-right:.375rem">Lv 2</span>
+          <div class="leaderboard-xp">150</div>
+        </div>
+      </div>
+
+      <p class="xp-to-next">✦ &nbsp;820 more XP to overtake Nuowei — keep questing! &nbsp;✦</p>
+    </div>
+  </main>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: GROVE
+════════════════════════════════════════ -->
+<div class="preview-page" id="page-grove">
+<div class="app">
+  <div id="sb-grove"></div>
+  <main id="main-content">
+    <div class="animate-in">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Moonlit Grove 🌙</h1>
+          <p class="page-subtitle">Your study party · 4 members</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-outline" onclick="showFlash('Invite code copied! 🌷','success')">Share</button>
+          <button class="btn btn-primary">+ Quest</button>
+        </div>
+      </div>
+
+      <!-- Invite Code -->
+      <div class="card" style="margin-bottom:1.25rem;display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap">
+        <div>
+          <div class="section-title" style="margin-bottom:.25rem">Invite Code</div>
+          <p style="font-size:var(--text-xs);color:var(--bark-light);font-style:italic">Share with friends to join your grove</p>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:.3rem">
+          <div class="invite-code" title="Click to copy">4B7K2M</div>
+          <span style="font-size:.65rem;color:var(--bark-light);font-style:italic">tap to copy</span>
+        </div>
+      </div>
+
+      <!-- Members -->
+      <div class="section-title">Members</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:1.25rem">
+        <div class="card" style="padding:.875rem;display:flex;align-items:center;gap:.625rem">
+          <div class="char-avatar" style="width:2rem;height:2rem;font-size:.95rem;background:linear-gradient(135deg,#C24878,#D86898)">✨</div>
+          <div><div style="font-weight:700;font-size:.8rem;color:var(--bark-mid)">Lunara <span style="font-size:.62rem;color:var(--honey)">(you)</span></div><div style="font-size:.68rem;color:var(--bark-light);font-style:italic">Dreamweaver</div></div>
+        </div>
+        <div class="card" style="padding:.875rem;display:flex;align-items:center;gap:.625rem">
+          <div class="char-avatar" style="width:2rem;height:2rem;font-size:.95rem;background:linear-gradient(135deg,#6B8F5E,#78B898)">🌾</div>
+          <div><div style="font-weight:700;font-size:.8rem;color:var(--bark-mid)">Jacob W.</div><div style="font-size:.68rem;color:var(--bark-light);font-style:italic">Harvester</div></div>
+        </div>
+        <div class="card" style="padding:.875rem;display:flex;align-items:center;gap:.625rem">
+          <div class="char-avatar" style="width:2rem;height:2rem;font-size:.95rem;background:linear-gradient(135deg,#E09E78,#D4845A)">🌻</div>
+          <div><div style="font-weight:700;font-size:.8rem;color:var(--bark-mid)">Nuowei C.</div><div style="font-size:.68rem;color:var(--bark-light);font-style:italic">Caretaker</div></div>
+        </div>
+        <div class="card" style="padding:.875rem;display:flex;align-items:center;gap:.625rem">
+          <div class="char-avatar" style="width:2rem;height:2rem;font-size:.95rem;background:linear-gradient(135deg,#5A9E80,#A8D0BC)">🌷</div>
+          <div><div style="font-weight:700;font-size:.8rem;color:var(--bark-mid)">Synne O.</div><div style="font-size:.68rem;color:var(--bark-light);font-style:italic">Wanderer</div></div>
+        </div>
+      </div>
+
+      <!-- Grove Quests -->
+      <div class="section-title">Grove Quests</div>
+      <div class="stack-md">
+
+        <div class="grove-quest-card">
+          <div class="grove-quest-header">
+            <div>
+              <div class="grove-quest-title">Midterm study session</div>
+              <div style="font-size:.7rem;color:var(--bark-light);margin-top:.2rem">Medium · +100 XP each</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="demoGrove(1)">Mark mine ✓</button>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="grove-p-1" style="width:50%"></div></div>
+          <div class="progress-meta"><span id="grove-c-1">2/4 members done</span><span>50%</span></div>
+        </div>
+
+        <div class="grove-quest-card">
+          <div class="grove-quest-header">
+            <div>
+              <div class="grove-quest-title">Weekly reflection</div>
+              <div style="font-size:.7rem;color:var(--bark-light);margin-top:.2rem">Easy · +50 XP each</div>
+            </div>
+            <button class="btn btn-outline btn-sm">Mark mine ✓</button>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+          <div class="progress-meta"><span>1/4 members done</span><span>25%</span></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: PROFILE / JOURNAL
+════════════════════════════════════════ -->
+<div class="preview-page" id="page-profile">
+<div class="app">
+  <div id="sb-profile"></div>
+  <main id="main-content">
+    <div class="animate-in">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">My Journal</h1>
+          <p class="page-subtitle">Your adventure log</p>
+        </div>
+      </div>
+
+      <!-- Character card -->
+      <div class="card card-honey card-flourish" style="margin-bottom:1.25rem">
+        <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap">
+          <div style="width:3.5rem;height:3.5rem;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--moss),var(--moss-mid));display:flex;align-items:center;justify-content:center;font-size:1.75rem;border:2px solid rgba(255,255,255,.15)">✨</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-family:'Playfair Display',serif;font-size:1.375rem;font-weight:700;color:var(--bark-mid)">Lunara Voss</div>
+            <div style="display:flex;align-items:center;gap:.5rem;margin-top:.25rem;flex-wrap:wrap">
+              <span class="badge badge-level" style="font-size:.72rem;padding:.2rem .6rem">Level 4 · Blooming Scholar</span>
+              <span style="font-size:.78rem;color:var(--bark-light);font-style:italic">Dreamweaver</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider-botanical" style="margin:1rem 0">✿</div>
+
+        <div style="background:var(--moss-ghost);border:1px solid var(--moss-pale);border-radius:var(--radius-md);padding:.75rem 1rem">
+          <div style="font-weight:700;font-size:.78rem;color:var(--moss);margin-bottom:.25rem">✨ Dreamweaver Perk</div>
+          <div style="font-size:.78rem;color:var(--bark-light)">+25% XP on <strong style="color:var(--bark-mid)">Hard</strong> quests — channel that creative energy!</div>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="grid-stats" style="margin-bottom:1.25rem">
+        <div class="stat-card"><span class="stat-icon">⚡</span><div class="stat-value">380</div><div class="stat-label">Total XP</div><div class="stat-bg">⚡</div></div>
+        <div class="stat-card"><span class="stat-icon">📜</span><div class="stat-value">12</div><div class="stat-label">Quests</div><div class="stat-bg">📜</div></div>
+        <div class="stat-card"><span class="stat-icon">🔥</span><div class="stat-value">7</div><div class="stat-label">Streak</div><div class="stat-bg">🔥</div></div>
+        <div class="stat-card"><span class="stat-icon">🏆</span><div class="stat-value">#3</div><div class="stat-label">Rank</div><div class="stat-bg">🏆</div></div>
+      </div>
+
+      <!-- Recently completed -->
+      <div class="section-title">Recently Completed</div>
+      <div class="grid-quests">
+        <div class="quest-item complete" data-difficulty="hard" style="opacity:.55">
+          <button class="quest-check checked">✓</button>
+          <div class="quest-body">
+            <div class="quest-title">COMP3000 Final Report</div>
+            <div class="quest-meta"><span class="badge badge-hard">Hard</span><span class="badge badge-complete">+250 XP</span><span>2 days ago</span></div>
+          </div>
+        </div>
+        <div class="quest-item complete" data-difficulty="medium" style="opacity:.55">
+          <button class="quest-check checked">✓</button>
+          <div class="quest-body">
+            <div class="quest-title">MATH2050 Problem Set 3</div>
+            <div class="quest-meta"><span class="badge badge-medium">Medium</span><span class="badge badge-complete">+100 XP</span><span>3 days ago</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: LOGIN
+════════════════════════════════════════ -->
+<div class="preview-page" id="page-login">
+  <div class="auth-wrap" style="background:var(--parchment)">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-icon">🌸</div>
+        <div class="auth-title">Study Quest</div>
+        <div class="auth-subtitle">Welcome back, scholar</div>
+      </div>
+      <div class="form-group">
+        <input type="email" class="form-input" placeholder="you@university.edu" value="you@university.edu">
+      </div>
+      <div class="form-group">
+        <input type="password" class="form-input" placeholder="••••••••" value="password123">
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" onclick="showFlash('Welcome back, Lunara! 🌸','success')">
+        Enter the Garden 🌸
+      </button>
+      <p style="text-align:center;margin-top:.875rem;font-size:.8rem;color:var(--bark-light)">
+        Don't have an account? <a href="#" style="color:var(--moss)">Sign up →</a>
+      </p>
+      <div class="divider-botanical" style="margin:.875rem 0">✿</div>
+      <p style="text-align:center;font-size:.75rem;color:var(--bark-light)">
+        New here? <a href="#" style="color:var(--moss)">Create your character</a> to begin
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ════ LEVEL-UP MODAL ════ -->
+<div class="modal-overlay" id="levelup-modal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal">
+    <div class="confetti-burst" id="confetti-burst" aria-hidden="true"></div>
+    <span class="levelup-icon float-anim">🌸</span>
+    <div class="levelup-title">You levelled up!</div>
+    <div class="levelup-level" id="levelup-level-text">Level 5</div>
+    <div class="levelup-title-name" id="levelup-title-text">Keeper of the Grove</div>
+    <button class="btn btn-gold btn-lg" onclick="closeLevelUpModal()">Keep Blooming ✦</button>
+  </div>
+</div>
+
+<!-- ════ FLASH CONTAINER ════ -->
+<div class="flash-container" id="flash-container"></div>
+
+<script>
+// ── Inject sidebar into every page ────────────────────────
+const tpl = document.getElementById('sidebar-tpl').content;
+['dashboard','quests','leaderboard','grove','profile'].forEach(page => {
+  const mount = document.getElementById('sb-' + page);
+  if (!mount) return;
+  const clone = tpl.cloneNode(true);
+  // Set active nav item
+  clone.querySelectorAll('.nav-item[data-page]').forEach(a => {
+    a.classList.toggle('active', a.dataset.page === page);
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      switchPage(a.dataset.page, null, 'localhost:5000/' + a.dataset.page);
+    });
+  });
+  mount.appendChild(clone);
+});
+
+// ── Page switcher ─────────────────────────────────────────
+function switchPage(name, btnEl, url) {
+  document.querySelectorAll('.preview-page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-' + name);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  else {
+    document.querySelectorAll('.ptab').forEach(b => {
+      if (b.textContent.toLowerCase().includes(name.toLowerCase())) b.classList.add('active');
+    });
+  }
+  if (url) document.getElementById('url-bar').textContent = url;
+  window.scrollTo(0, 0);
+}
+
+// ── Flash ─────────────────────────────────────────────────
+function showFlash(msg, cat) {
+  cat = cat || 'info';
+  const icons = {success:'✅', error:'❌', warning:'⚠️', info:'ℹ️'};
+  const el = document.createElement('div');
+  el.className = 'flash flash-' + cat;
+  el.innerHTML = `<span class="flash-icon">${icons[cat]||'ℹ️'}</span>
+    <span class="flash-message">${msg}</span>
+    <button class="flash-close" onclick="this.closest('.flash').classList.add('removing');setTimeout(()=>this.closest('.flash').remove(),300)">✕</button>`;
+  document.getElementById('flash-container').appendChild(el);
+  setTimeout(() => { el.classList.add('removing'); setTimeout(() => el.remove(), 300); }, 5000);
+}
+
+function dismissFlash(btn) {
+  const f = btn.closest('.flash');
+  f.classList.add('removing');
+  setTimeout(() => f.remove(), 300);
+}
+
+// ── Level-up modal ────────────────────────────────────────
+const LEVEL_TITLES = {1:'Tiny Sprout',2:'Little Herb',3:'Wildflower',4:'Blooming Scholar',5:'Keeper of the Grove',6:'Petal Tender',7:'Moonlit Scholar',8:'Elder Bloom',9:'Ancient Herbalist',10:'Grand Herbalist'};
+
+function showLevelUpModal(level) {
+  document.getElementById('levelup-level-text').textContent = 'Level ' + level;
+  document.getElementById('levelup-title-text').textContent = LEVEL_TITLES[level] || 'Grand Scholar';
+  document.getElementById('levelup-modal').classList.add('open');
+  spawnConfetti();
+}
+function closeLevelUpModal() {
+  document.getElementById('levelup-modal').classList.remove('open');
+}
+document.getElementById('levelup-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeLevelUpModal();
+});
+
+function spawnConfetti() {
+  const c = document.getElementById('confetti-burst');
+  c.innerHTML = '';
+  const cols = ['#C24878','#F5C0D8','#9070B8','#C4A8E0','#5A9E80','#A8D0BC','#D4845A','#F0BEA0'];
+  for (let i = 0; i < 28; i++) {
+    const s = document.createElement('span');
+    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*35}%;background:${cols[Math.floor(Math.random()*cols.length)]};animation-delay:${Math.random()*.5}s;animation-duration:${.9+Math.random()*.9}s`;
+    c.appendChild(s);
+  }
+}
+
+// ── Demo: complete task ───────────────────────────────────
+let currentXp = 380;
+function demoComplete(id, xp) {
+  const item  = document.getElementById('task-' + id);
+  const check = document.getElementById('task-check-' + id);
+  if (!item || item.classList.contains('complete')) return;
+  item.classList.add('complete');
+  check.classList.add('checked', 'sparkle-pop');
+  check.textContent = '✓';
+  currentXp += xp;
+  // Update XP bar on dashboard
+  const pct = Math.min(((currentXp - 500) + (currentXp >= 500 ? 0 : currentXp) ) / 500 * 100 + 76, 100);
+  const bar = document.getElementById('dash-xp-bar');
+  if (bar) bar.style.width = Math.min(currentXp / 500 * 100, 100) + '%';
+  const sideBar = document.getElementById('sidebar-xp-fill');
+  if (sideBar) sideBar.style.width = Math.min(currentXp / 500 * 100, 100) + '%';
+  showFlash('+' + xp + ' XP earned! 🌸', 'success');
+  if (id === 1) setTimeout(() => showLevelUpModal(5), 600);
+}
+
+// ── Demo: grove quest ─────────────────────────────────────
+let groveDone = 2;
+function demoGrove(id) {
+  groveDone = Math.min(groveDone + 1, 4);
+  const bar = document.getElementById('grove-p-1');
+  const cnt = document.getElementById('grove-c-1');
+  if (bar) bar.style.width = (groveDone/4*100) + '%';
+  if (cnt) cnt.textContent = groveDone + '/4 members done';
+  if (groveDone === 4) showFlash('Grove quest complete! Everyone earns XP 🌷', 'success');
+  else showFlash('Contribution recorded! (' + groveDone + '/4 done)', 'info');
+}
+
+// ── Difficulty chip toggle ────────────────────────────────
+document.querySelectorAll('.difficulty-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    const group = this.closest('.difficulty-chips');
+    group.querySelectorAll('.difficulty-chip').forEach(c => c.classList.remove('selected'));
+    this.classList.add('selected');
+    const hidden = this.closest('form, .card')?.querySelector('input[name="difficulty"]');
+    if (hidden) hidden.value = this.dataset.difficulty;
+  });
+});
+
+// ── Invite code copy ──────────────────────────────────────
+document.querySelectorAll('.invite-code').forEach(el => {
+  el.addEventListener('click', function() {
+    navigator.clipboard?.writeText(this.textContent.trim())
+      .then(() => showFlash('Invite code copied! 🌸', 'success'));
+  });
+});
+</script>
+</body>
+</html>
