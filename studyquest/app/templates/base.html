@@ -2,64 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Study Quest{% endblock %}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  {% block extra_head %}{% endblock %}
 </head>
 
-<body class="m-0 font-sans">
-
-<div class="flex min-h-screen">
-
-  <!-- SIDEBAR -->
-  <aside class="w-64 border-r border-black p-5 flex flex-col justify-evenly">
-
-    <!-- LOGO -->
-    <div>
-      <h2 class="text-xl font-bold">Study Quest</h2>
+<body>
+<aside id="sidebar">
+  <!-- sidebar content -->
+   <a href="/" class="sidebar-brand">
+  <span class="brand-icon">🌸</span>
+  <div>
+    <div class="brand-name">Study Quest</div>
+    <div class="brand-tagline">bloom · grow · thrive</div>
+  </div>
+</a>
+<nav class="sidebar-nav">
+  <a href="/dashboard" class="nav-item"><span class="nav-icon">🏡</span> My Cottage</a>
+  <a href="/tasks" class="nav-item"><span class="nav-icon">📜</span> My Quests</a>
+  <a href="/leaderboard" class="nav-item"><span class="nav-icon">🏆</span> Leaderboard</a>
+</nav>
+</aside>
+<main id="main-content">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">
+          {{ message }}
+          <button onclick="this.closest('.flash').remove()">✕</button>
+        </div>
+      {% endfor %}
     </div>
-
-    <!-- NAV -->
-    <div>
-      <nav class="space-y-2">
-        <a href="{{ url_for('dashboard') }}" class="block">Dashboard</a>
-        <a href="{{ url_for('my_quests') }}" class="block">My Quests</a>
-        <a href="#" class="block">Leaderboard</a>
-        <a href="#" class="block">Profile</a>
-      </nav>
-    </div>
-
-    <!-- USER INFO -->
-    <div>
-      <p><strong>Username</strong></p>
-      <p>Level 3</p>
-      <p>120 / 200 XP</p>
-    </div>
-
-    <div>
-      <button class="border border-black px-3 py-1">Logout</button>
-    </div>
-
-  </aside>
-
-  <!-- MAIN CONTENT -->
-  <main class="flex-1 p-8 max-w-3xl mx-auto">
-
-    <!-- FLOATING BUTTON -->
-    <div class="fixed top-5 right-5">
-      <a href="{{ url_for('create_quest') }}"
-         class="border border-black px-3 py-1 inline-block">
-        + NEW QUEST
-      </a>
-    </div>
-
-    <!-- PAGE-SPECIFIC CONTENT GOES HERE -->
-    {% block content %}{% endblock %}
-
-  </main>
-
-</div>
-
+  {% endif %}
+{% endwith %}
+  {% block content %}{% endblock %}
+</main>
+{% block extra_scripts %}{% endblock %}
 </body>
 </html>
