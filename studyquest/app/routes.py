@@ -1,7 +1,8 @@
-from app import app,db
-from flask import render_template, request, redirect, url_for, flash, session
-from app.models import User
+from app import app
+from flask import render_template
 from datetime import datetime
+
+### TODO: remove/edit when DB is implemented
 from app.mock_data import mock_quests
 
 active_quests = [q for q in mock_quests if q.status == "In Progress"]
