@@ -8,24 +8,24 @@
 
 <section class="border border-black p-5">
 
-  <form>
+  <form  method="POST" action="{{ url_for('create_quest') }}">
 
     <!-- QUEST TITLE -->
     <div class="mb-4">
       <label class="block mb-1">Quest Title</label>
-      <input type="text" class="w-full border border-black p-2">
+      <input type="text"  name="title" class="w-full border border-black p-2">
     </div>
 
     <!-- DESCRIPTION -->
     <div class="mb-4">
       <label class="block mb-1">Description</label>
-      <textarea class="w-full border border-black p-2"></textarea>
+      <textarea name="description" class="w-full border border-black p-2"></textarea>
     </div>
 
     <!-- QUEST TYPE -->
     <div class="mb-4">
       <label class="block mb-1">Quest Type</label>
-      <select class="w-full border border-black p-2">
+      <select name="quest_type" class="w-full border border-black p-2">
         <option value="study">Study</option>
         <option value="assignment">Assignment</option>
         <option value="exam">Exam Prep</option>
@@ -36,7 +36,7 @@
     <!-- DIFFICULTY -->
     <div class="mb-4">
       <label class="block mb-1">Difficulty</label>
-      <select class="w-full border border-black p-2">
+      <select name="difficulty" class="w-full border border-black p-2">
         <option value="easy">Easy</option>
         <option value="medium">Medium</option>
         <option value="hard">Hard</option>
@@ -46,11 +46,12 @@
     <!-- DUE DATE -->
     <div class="mb-5">
       <label class="block mb-1">Due Date</label>
-      <input type="date" class="w-full border border-black p-2">
+      <input name="due_date" type="date" class="w-full border border-black p-2">
+      <p class="text-sm text-gray-500">Optional</p>
     </div>
 
     <!-- SUBMIT -->
-    <button class="border border-black px-4 py-2">
+    <button type="submit" class="border border-black px-4 py-2">
       Create Quest
     </button>
 
