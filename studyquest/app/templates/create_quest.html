@@ -8,45 +8,51 @@
 
 <section class="card">
 
-  <form method="POST" action="{{ url_for('create_quest') }}">
+  <form method="POST" action="{{ url_for('create_quest') }}" onsubmit="return validateForm(event)">
 
     <!-- QUEST TITLE -->
     <div class="form-group">
       <label class="form-label">Quest Title</label>
-      <input type="text" name="title" class="form-input">
+      <input type="text" name="title" class="form-input" id="title">
+      <span id="title-error" class="form-error"></span>
     </div>
 
     <!-- DESCRIPTION -->
     <div class="form-group">
       <label class="form-label">Description</label>
-      <textarea name="description" class="form-textarea"></textarea>
+      <textarea name="description" class="form-textarea" id="description"></textarea>
+      <span id="description-error" class="form-error"></span>
     </div>
 
     <!-- QUEST TYPE -->
     <div class="mb-4">
       <label class="form-label">Quest Type</label>
-      <select name="quest_type" class="form-select">
+      <select name="quest_type" class="form-select" id="quest_type">
+        <option value="" disabled selected>-- Select --</option>
         <option value="study">Study</option>
         <option value="assignment">Assignment</option>
         <option value="exam">Exam Prep</option>
         <option value="personal">Personal</option>
       </select>
+       <span id="quest_type-error" class="form-error"></span>
     </div>
 
     <!-- DIFFICULTY -->
     <div class="mb-4">
       <label class="form-label">Difficulty</label>
-      <select name="difficulty" class="form-select">
+      <select name="difficulty" class="form-select" id="difficulty">
+        <option value="" disabled selected>-- Select --</option>
         <option value="easy">Easy</option>
         <option value="medium">Medium</option>
         <option value="hard">Hard</option>
       </select>
+       <span id="difficulty-error" class="form-error"></span>
     </div>
 
     <!-- DUE DATE -->
     <div class="mb-5">
       <label class="form-label">Due Date</label>
-      <input name="due_date" type="date" class="form-input">
+      <input name="due_date" type="date" class="form-input" id="due_date" >
       <p class="text-sm text-gray-500">Optional</p>
     </div>
 
@@ -58,5 +64,7 @@
   </form>
 
 </section>
+
+<script src="{{ url_for('static', filename='js/quest-form-validation.js') }}"></script>
 
 {% endblock %}
