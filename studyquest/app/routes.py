@@ -1,26 +1,31 @@
 from app import app
 from flask import render_template
-from datetime import datetime
+from datetime import date, timedelta
 
 ### TODO: remove/edit when DB is implemented
 from app.mock_data import mock_quests
 
+# Filter quests based on their status
 active_quests = [q for q in mock_quests if q.status == "In Progress"]
+print(active_quests[0].start_date)  # You may need to check for `start_date` or `due_date`
+
 completed_quests = [q for q in mock_quests if q.status == "Completed"]
 
-# Sort quests by due_date (ascending)
+# Sort quests by due_date (ascending) - we compare dates only
 active_quests_with_due_date = sorted(
     [q for q in active_quests if q.due_date], key=lambda x: x.due_date
 )
 completed_quests_with_due_date = sorted(
     [q for q in completed_quests if q.due_date], key=lambda x: x.due_date
 )
+
 # Quests with no due date
 active_quests_no_due_date = [q for q in active_quests if not q.due_date]
 completed_quests_no_due_date = [q for q in completed_quests if not q.due_date]
-# Overdue quests (ensure due_date exists)
+
+# Overdue quests (ensure due_date exists and compare with current date)
 overdue_quests = [
-    q for q in mock_quests if q.due_date and q.due_date.date() < datetime.now().date() and q.status != "Completed"
+    q for q in mock_quests if q.due_date and q.due_date < date.today() and q.status != "Completed"
 ]
 overdue_quests_sorted = sorted(overdue_quests, key=lambda x: x.due_date)
 

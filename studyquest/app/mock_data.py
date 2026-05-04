@@ -1,5 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from .models import Quest
+
+DEFAULT_STATUS = "In Progress"
 
 mock_quests = [
     Quest(
@@ -8,7 +10,9 @@ mock_quests = [
         description="Complete weekly lab tasks",
         quest_type="study",
         difficulty="easy",
-        due_date=datetime.now() + timedelta(days=-1)  
+        due_date=date.today() - timedelta(days=1),  
+        status=DEFAULT_STATUS,
+        start_date=date.today() - timedelta(days=4)
     ),
 
     Quest(
@@ -17,6 +21,8 @@ mock_quests = [
         description="Write first essay draft",
         quest_type="assignment",
         difficulty="medium",
+        status=DEFAULT_STATUS,
+        start_date=date.today() - timedelta(days=2)
     ),
 
     Quest(
@@ -25,7 +31,9 @@ mock_quests = [
         description="Revise lecture material",
         quest_type="exam",
         difficulty="hard",
-        due_date=datetime.now() + timedelta(days=2)  
+        due_date=date.today() + timedelta(days=2),  # Use date instead of datetime
+        status=DEFAULT_STATUS,
+        start_date=date.today() 
     ),
     
     Quest(
@@ -34,6 +42,8 @@ mock_quests = [
         description="Finish report section",
         quest_type="assignment",
         difficulty="medium",
-        due_date=datetime.now() + timedelta(days=10)  
+        due_date=date.today() + timedelta(days=10),  # Use date instead of datetime
+        status=DEFAULT_STATUS,
+        start_date=date.today() 
     )
 ]
