@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from app import app,db
 from flask import render_template, request, redirect, url_for, flash, session
 from app.models import User,Quest
