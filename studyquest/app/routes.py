@@ -1,10 +1,20 @@
 from app import app,db
-from flask import render_template, request, redirect, url_for, flash, session
+from flask import render_template, request, redirect, url_for, flash, session, g
 from app.models import User,Quest
 from datetime import datetime, date
+from functools import wraps
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route("/") 
 @app.route("/dashboard")
+@login_required
 def dashboard():
     # Query database for active quests with due dates, ordered by due date
     active_quests = Quest.query.filter_by(status="In Progress")\
@@ -14,6 +24,7 @@ def dashboard():
     return render_template('dashboard.html', quests=active_quests)
 
 @app.route("/my-quests")
+@login_required
 def my_quests():
     active_q = Quest.query.filter_by(status="In Progress").all()
     completed_q = Quest.query.filter_by(status="Completed").all()
@@ -50,6 +61,7 @@ def my_quests():
     )
 
 @app.route('/create-quest', methods=['GET', 'POST'])
+@login_required
 def create_quest():
     print(request.method)
     if request.method == 'POST':
@@ -128,3 +140,4 @@ def register():
         return redirect(url_for("login"))
 
     return render_template("register.html")
+
