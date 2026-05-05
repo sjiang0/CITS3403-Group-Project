@@ -13,6 +13,7 @@
 <div class="flex min-h-screen">
 
   <!-- SIDEBAR -->
+  {% if is_logged_in %}
   <aside class="w-64 border-r border-black p-5 flex flex-col justify-evenly">
 
     <!-- LOGO -->
@@ -38,10 +39,13 @@
     </div>
 
     <div>
-      <button class="border border-black px-3 py-1">Logout</button>
+       <form action="{{ url_for('logout') }}" method="POST">
+        <button type="submit" class="border border-black px-3 py-1">Logout</button>
+       </form>
     </div>
 
   </aside>
+  {% endif %}
 
   <!-- MAIN CONTENT -->
   <main class="flex-1 p-8 max-w-3xl mx-auto">

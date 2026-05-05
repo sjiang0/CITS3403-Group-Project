@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="display:flex; justify-content:center; align-items:center; height:100vh; font-family: Arial, sans-serif;">
+
+  <div style="width:800px; display:flex; border:1px solid black;">
+
+    <!-- LEFT SIDE -->
+    <div style="width:33%; border-right:1px solid black; padding:30px;">
+      <h2>Study Quest</h2>
+      <p>Create an account to start your quest journey and earn XP.</p>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div style="width:67%; padding:40px; display:flex; justify-content:center; align-items:center;">
+
+      <div style="width:100%; max-width:320px;">
+
+        <h3 style="text-align:center;">Create Account</h3>
+
+        <form action="{{ url_for('register') }}" method="POST">
+
+          <div style="margin-bottom:15px;">
+            <label>Username</label><br>
+            <input type="text" name="username" required
+              style="width:100%; padding:8px;" autocomplete="off">
+          </div>
+
+          <div style="margin-bottom:15px;">
+            <label>Password</label><br>
+            <input type="password" name="password" required
+              style="width:100%; padding:8px;" autocomplete="off">
+          </div>
+
+          <div style="margin-bottom:15px;">
+            <label>Confirm Password</label><br>
+            <input type="password" name="confirm_password" required
+              style="width:100%; padding:8px;" autocomplete="off">
+          </div>
+
+          <button type="submit"
+            style="width:100%; padding:10px; cursor:pointer;">
+            Create Account
+          </button>
+
+        </form>
+
+        <p style="text-align:center; margin-top:12px;">
+          Already have an account?
+          <a href="{{ url_for('login') }}">Login</a>
+        </p>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

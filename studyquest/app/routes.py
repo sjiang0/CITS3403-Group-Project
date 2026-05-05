@@ -1,9 +1,20 @@
-from app import app
-from flask import render_template, redirect, url_for, flash, request
-from datetime import datetime
+from app import app,db
+from flask import render_template, request, redirect, url_for, flash, session, g
+from app.models import User,Quest
+from datetime import datetime, date
+from functools import wraps
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route("/") 
 @app.route("/dashboard")
+@login_required
 def dashboard():
     # Query database for active quests with due dates, ordered by due date
     active_quests = Quest.query.filter_by(status="In Progress")\
@@ -13,6 +24,7 @@ def dashboard():
     return render_template('dashboard.html', quests=active_quests)
 
 @app.route("/my-quests")
+@login_required
 def my_quests():
     active_q = Quest.query.filter_by(status="In Progress").all()
     completed_q = Quest.query.filter_by(status="Completed").all()
@@ -49,6 +61,7 @@ def my_quests():
     )
 
 @app.route('/create-quest', methods=['GET', 'POST'])
+@login_required
 def create_quest():
     print(request.method)
     if request.method == 'POST':
@@ -75,3 +88,56 @@ def create_quest():
 
         return redirect(url_for('dashboard')) #TODO: decide where to redirect
     return render_template("create_quest.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"].lower().strip()
+        password = request.form["password"]
+
+        user = User.query.filter_by(username=username).first()
+
+        if not user:
+            flash("Username does not exist.", "danger")
+            return redirect(url_for("login"))
+
+        if not user.check_password(password):
+            flash("Incorrect password.", "danger")
+            return redirect(url_for("login"))
+
+        session["user_id"] = user.id
+        session["username"] = user.username
+
+        flash("Logged in successfully!", "success")
+        return redirect(url_for("dashboard"))
+
+    return render_template("login.html")
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    flash("You have been logged out.", "info")
+    return redirect(url_for("login"))
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"].lower().strip()
+        password = request.form["password"]
+
+        if User.query.filter_by(username=username).first():
+            flash("Username already exists.", "danger")
+            return redirect(url_for("register"))
+
+        new_user = User(username=username)
+        new_user.set_password(password)
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("Account created! Please log in.", "success")
+        return redirect(url_for("login"))
+
+    return render_template("register.html")
+

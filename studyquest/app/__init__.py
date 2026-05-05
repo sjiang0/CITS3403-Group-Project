@@ -1,16 +1,13 @@
-import os
-import secrets
 from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from .config import Config
 
 app = Flask(__name__)
-
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(32))
+app.config.from_object(Config)
 
 db = SQLAlchemy(app)
+migrate = Migrate(app,db)
 
 @app.context_processor
 def inject_auth():
@@ -19,4 +16,4 @@ def inject_auth():
         "username": session.get("username")
     }
 
-from app import routes, models
+from . import routes,models
