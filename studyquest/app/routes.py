@@ -1,7 +1,7 @@
 from app import app,db
 from flask import render_template, request, redirect, url_for, flash, session
 from app.models import User,Quest
-from datetime import datetime
+from datetime import datetime, date
 
 @app.route("/") 
 @app.route("/dashboard")
