@@ -34,7 +34,7 @@ class Quest(db.Model):
 
         reward = xp_map.get(self.difficulty, 10)
 
-        self.user.xp += reward
+        self.user.xp = (self.user.xp or 0) + reward
 
         self.user.last_active = date.today()
 

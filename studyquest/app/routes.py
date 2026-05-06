@@ -22,14 +22,49 @@ def load_logged_in_user():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    # Query database for active quests with due dates, ordered by due date
+    # Active quests with due dates
     active_quests = Quest.query.filter_by(
-        user_id = g.user.id,
+        user_id=g.user.id,
         status="In Progress"
-        ).filter(Quest.due_date.isnot(None))\
-        .order_by(Quest.due_date.asc()).all()
-        
-    return render_template('dashboard.html', quests=active_quests)
+    ).filter(Quest.due_date.isnot(None)) \
+     .order_by(Quest.due_date.asc()).all()
+
+    # XP + Level
+    xp = g.user.xp or 0
+    level = (xp // 100) + 1
+    xp_into_level = xp % 100
+    xp_percent = round((xp_into_level / 100) * 100)
+
+    # Streak
+    streak = g.user.streak or 0
+
+    # Completed quests (for weekly stats)
+    completed_quests = Quest.query.filter_by(
+        user_id=g.user.id,
+        status="Completed"
+    ).all()
+
+    today = date.today()
+
+    completed_week_count = sum(
+        1 for q in completed_quests
+        if q.date_completed and (today - q.date_completed).days <= 7
+    )
+
+    total_quests = Quest.query.filter_by(user_id=g.user.id).count()
+    completion_rate = int((len(completed_quests) / total_quests) * 100) if total_quests else 0
+
+    return render_template(
+        "dashboard.html",
+        quests=active_quests,
+        xp=xp,
+        level=level,
+        xp_into_level=xp_into_level,
+        xp_percent=xp_percent,
+        streak=streak,
+        completed_week_count=completed_week_count,
+        completion_rate=completion_rate
+    )
 
 @app.route("/my-quests")
 @login_required
@@ -161,7 +196,23 @@ def delete_quest(quest_id):
 def complete_quest(quest_id):
     quest = Quest.query.filter_by(id=quest_id, user_id=g.user.id).first_or_404()
 
+    # mark quest complete + award XP + update last_active
     quest.mark_completed()
+
+    # update streak logic
+    user = g.user
+    today = date.today()
+
+    if user.last_active:
+        if (today - user.last_active).days == 1:
+            user.streak += 1
+        elif user.last_active != today:
+            user.streak = 1
+    else:
+        user.streak = 1
+
+    user.last_active = today
+
     db.session.commit()
 
     flash("Quest completed!", "flash-success")

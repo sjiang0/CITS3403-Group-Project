@@ -11,14 +11,19 @@
 <!-- XP SECTION -->
 <section class="card mb-5">
 
+  {% set level = (g.user.xp // 100) + 1 %}
+  {% set xp_into_level = g.user.xp % 100 %}
+  {% set xp_percent = xp_into_level %}
+
   <div>
-    <p class="font-semibold mb-2">Level 3</p>
+    <p class="font-semibold mb-2">Level {{ level }}</p>
 
     <div class="xp-bar-container" style="width: 100%;">
-      <div class="xp-bar-fill" style="width: 66%;"></div>
+      <div class="xp-bar-fill" style="--xp: {{ xp_percent | int }}%;"></div>
     </div>
-
-    <p class="xp-label">120 / 200 XP</p>
+    <p class="xp-label">
+      {{ xp_into_level }} / 100 XP
+    </p>
   </div>
 
 </section>
@@ -30,22 +35,28 @@
   <div class="grid-stats text-sm">
 
     <div class="stat-card">
-      <div class="stat-value">3</div>
+      <div class="stat-value">
+        {{ completed_week_count }}
+      </div>
       <div class="stat-label">Completed this week</div>
     </div>
 
     <div class="stat-card">
-      <div class="stat-value">4</div>
+      <div class="stat-value">
+        {{ g.user.streak }}
+      </div>
       <div class="stat-label">Day streak</div>
     </div>
 
     <div class="stat-card">
-      <div class="stat-value">#3</div>
+      <div class="stat-value">#{{ level }}</div>
       <div class="stat-label">Rank</div>
     </div>
 
     <div class="stat-card">
-      <div class="stat-value">62%</div>
+      <div class="stat-value">
+        {{ completion_rate }}%
+      </div>
       <div class="stat-label">Completion rate</div>
     </div>
 
