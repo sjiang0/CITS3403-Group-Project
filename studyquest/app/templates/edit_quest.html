@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Quest - Study Quest{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-4">Edit Quest</h2>
+
+<section class="card">
+
+  <form method="POST" action="{{ url_for('edit_quest', quest_id=quest.id) }}" id="quest_form">
+
+    <!-- QUEST TITLE -->
+    <div class="form-group">
+      <label class="form-label">Quest Title</label>
+      <input 
+        type="text" 
+        name="title" 
+        class="form-input" 
+        id="title"
+        value="{{ quest.title }}"
+      >
+      <span id="title-error" class="form-error"></span>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea 
+        name="description" 
+        class="form-textarea" 
+        id="description"
+      >{{ quest.description }}</textarea>
+      <span id="description-error" class="form-error"></span>
+    </div>
+
+    <!-- QUEST TYPE -->
+    <div class="mb-4">
+      <label class="form-label">Quest Type</label>
+      <select name="quest_type" class="form-select" id="quest_type">
+
+        <option value="study" {% if quest.quest_type == "study" %}selected{% endif %}>Study</option>
+        <option value="assignment" {% if quest.quest_type == "assignment" %}selected{% endif %}>Assignment</option>
+        <option value="exam" {% if quest.quest_type == "exam" %}selected{% endif %}>Exam Prep</option>
+        <option value="personal" {% if quest.quest_type == "personal" %}selected{% endif %}>Personal</option>
+
+      </select>
+      <span id="quest_type-error" class="form-error"></span>
+    </div>
+
+    <!-- DIFFICULTY -->
+    <div class="mb-4">
+      <label class="form-label">Difficulty</label>
+      <select name="difficulty" class="form-select" id="difficulty">
+
+        <option value="easy" {% if quest.difficulty == "easy" %}selected{% endif %}>Easy</option>
+        <option value="medium" {% if quest.difficulty == "medium" %}selected{% endif %}>Medium</option>
+        <option value="hard" {% if quest.difficulty == "hard" %}selected{% endif %}>Hard</option>
+
+      </select>
+      <span id="difficulty-error" class="form-error"></span>
+    </div>
+
+    <!-- DUE DATE -->
+    <div class="mb-5">
+      <label class="form-label">Due Date</label>
+      <input 
+        name="due_date" 
+        type="date" 
+        class="form-input" 
+        id="due_date"
+        value="{{ quest.due_date if quest.due_date else '' }}"
+      >
+      <p class="text-sm text-gray-500">Optional</p>
+      <span id="due_date-error" class="form-error"></span>
+    </div>
+
+    <!-- SUBMIT -->
+    <button type="submit" class="btn btn-primary">
+      Update Quest
+    </button>
+
+    <!-- OPTIONAL: cancel -->
+    <a href="{{ url_for('my_quests') }}" class="ml-3 underline">
+      Cancel
+    </a>
+
+  </form>
+
+</section>
+
+<script src="{{ url_for('static', filename='js/quest-form-validation.js') }}"></script>
+
+{% endblock %}

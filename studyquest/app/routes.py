@@ -174,16 +174,53 @@ def edit_quest(quest_id):
     quest = Quest.query.filter_by(id=quest_id, user_id=g.user.id).first_or_404()
 
     if request.method == "POST":
-        due_date = request.form.get("due_date")
-        due_date_obj = datetime.strptime(due_date, "%Y-%m-%d").date() if due_date else None
 
-        quest.update_from_form(
-            request.form.get("title"),
-            request.form.get("description"),
-            request.form.get("quest_type"),
-            request.form.get("difficulty"),
-            due_date_obj
-        )
+        title = request.form.get("title")
+        description = request.form.get("description")
+        quest_type = request.form.get("quest_type")
+        difficulty = request.form.get("difficulty")
+        due_date = request.form.get("due_date")
+
+        # validation (same rules as create)
+        errors = []
+
+        if not title:
+            errors.append("Title is required.")
+        if not description:
+            errors.append("Description is required.")
+        elif len(description) < 10:
+            errors.append("Description must be at least 10 characters.")
+
+        valid_types = ["study", "assignment", "exam", "personal"]
+        if quest_type not in valid_types:
+            errors.append("Invalid quest type selected.")
+
+        valid_difficulties = ["easy", "medium", "hard"]
+        if difficulty not in valid_difficulties:
+            errors.append("Invalid difficulty selected.")
+
+        due_date_obj = None
+        if due_date:
+            try:
+                due_date_obj = datetime.strptime(due_date, "%Y-%m-%d").date()
+
+                if due_date_obj < date.today():
+                    errors.append("Due date cannot be in the past.")
+
+            except ValueError:
+                errors.append("Invalid due date format.")
+
+        if errors:
+            for e in errors:
+                flash(e, "flash-error")
+            return redirect(url_for("edit_quest", quest_id=quest.id))
+
+        # update fields directly (no need for model method)
+        quest.title = title
+        quest.description = description
+        quest.quest_type = quest_type
+        quest.difficulty = difficulty
+        quest.due_date = due_date_obj
 
         db.session.commit()
 
