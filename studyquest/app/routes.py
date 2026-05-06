@@ -94,12 +94,39 @@ def create_quest():
         difficulty = request.form.get('difficulty')
         due_date = request.form.get('due_date')
 
-        # Validation: Ensure required fields are filled out
-        if not title or not description or not quest_type or not difficulty:
-            flash('All fields must be filled out!', 'error')
-            return render_template('create_quest.html')
+        errors = []
 
-        flash('Quest created successfully!', 'success')
+        # Validation
+        if not title:
+            errors.append("Title is required.")
+        if not description:
+            errors.append("Description is required.")
+        elif len(description) < 10:
+            errors.append("Description must be at least 10 characters.")
+        valid_types = ["study", "assignment", "exam", "personal"]
+        if quest_type not in valid_types:
+            errors.append("Invalid quest type selected.")
+        valid_difficulties = ["easy", "medium", "hard"]
+        if difficulty not in valid_difficulties:
+            errors.append("Invalid difficulty selected.")
+        due_date_obj = None
+        if due_date:
+            try:
+                due_date_obj = datetime.strptime(due_date, "%Y-%m-%d").date()
+
+                if due_date_obj < date.today():
+                    errors.append("Due date cannot be in the past.")
+
+            except ValueError:
+                errors.append("Invalid due date format.")
+
+        # display errors
+        if errors:
+            for e in errors:
+                flash(e, "flash-error")
+            return redirect(url_for("create_quest"))
+
+        flash('Quest created successfully!', 'flash-success')
 
         return redirect(url_for('dashboard')) #TODO: decide where to redirect
     return render_template("create_quest.html")
@@ -114,17 +141,17 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if not user:
-            flash("Username does not exist.", "danger")
+            flash("Username does not exist.", "flash-error")
             return redirect(url_for("login"))
 
         if not user.check_password(password):
-            flash("Incorrect password.", "danger")
+            flash("Incorrect password.", "flash-error")
             return redirect(url_for("login"))
 
         session["user_id"] = user.id
         session["username"] = user.username
 
-        flash("Logged in successfully!", "success")
+        flash("Logged in successfully!", "flash-success")
         return redirect(url_for("dashboard"))
 
     return render_template("login.html")
@@ -132,7 +159,7 @@ def login():
 @app.route("/logout", methods=["POST"])
 def logout():
     session.clear()
-    flash("You have been logged out.", "info")
+    flash("You have been logged out.", "flash-info")
     return redirect(url_for("login"))
 
 @app.route("/register", methods=["GET", "POST"])
@@ -142,7 +169,7 @@ def register():
         password = request.form["password"]
 
         if User.query.filter_by(username=username).first():
-            flash("Username already exists.", "danger")
+            flash("Username already exists.", "flash-error")
             return redirect(url_for("register"))
 
         new_user = User(username=username)
@@ -151,7 +178,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        flash("Account created! Please log in.", "success")
+        flash("Account created! Please log in.", "flash-success")
         return redirect(url_for("login"))
 
     return render_template("register.html")

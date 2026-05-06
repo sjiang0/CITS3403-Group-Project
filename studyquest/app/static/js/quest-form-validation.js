@@ -21,6 +21,9 @@ function validateForm(event) {
     if (description.trim() === '') {
         document.getElementById('description-error').textContent = 'Description is required.';
         isValid = false;
+    } else if (description.length < 10) {
+        document.getElementById('description-error').textContent = 'Description must be at least 10 characters.';
+        isValid = false;
     }
 
     if (questType === '') {
