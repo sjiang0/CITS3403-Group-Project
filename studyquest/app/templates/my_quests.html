@@ -4,13 +4,6 @@
 
 {% block content %}
 
-<!-- FLOATING BUTTON -->
-<div class="fixed top-5 right-5">
-  <a href="{{ url_for('create_quest') }}" class="border border-black px-3 py-1 inline-block">
-    + NEW QUEST
-  </a>
-</div>
-
 <h2 class="text-2xl font-bold mb-6">My Quests</h2>
 
 <!-- QUEST STATS -->
@@ -35,40 +28,145 @@
   </div>
 </section>
 
-<!-- OVERDUE QUESTS -->
+<!-- ================= OVERDUE ================= -->
 <section class="border border-black p-4 mb-5">
   <h3 class="font-bold mb-3">Overdue Quests</h3>
-  <ul class="space-y-1">
+
+  <ul class="space-y-2">
     {% for quest in overdue_quests %}
-      <li>❌ {{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}] — Due: {{ quest.due_date.strftime('%d %b') }}</li>
+      <li class="border border-black p-2">
+
+        <p class="font-bold">❌ {{ quest.title }}</p>
+        <p class="text-sm">{{ quest.description }}</p>
+
+        <p class="text-xs mt-1">
+          {{ quest.quest_type | capitalize }} • {{ quest.difficulty | capitalize }}
+          • Due: {{ quest.due_date.strftime('%d %b') }}
+        </p>
+
+        <!-- ACTIONS -->
+        <div class="flex gap-2 mt-2">
+
+          <!-- EDIT (hide if completed) -->
+          {% if quest.status != "Completed" %}
+          <a href="{{ url_for('edit_quest', quest_id=quest.id) }}"
+             class="border border-black px-2 py-1 text-xs">
+            Edit
+          </a>
+          {% endif %}
+
+          <!-- COMPLETE -->
+          {% if quest.status != "Completed" %}
+          <form method="POST"
+                action="{{ url_for('complete_quest', quest_id=quest.id) }}">
+            <button class="border border-black px-2 py-1 text-xs">
+              Complete
+            </button>
+          </form>
+          {% endif %}
+
+          <!-- DELETE -->
+          <form method="POST"
+                action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+                onsubmit="return confirm('Delete this quest?');">
+            <button class="border border-black px-2 py-1 text-xs">
+              Delete
+            </button>
+          </form>
+
+        </div>
+      </li>
     {% else %}
       <li>No overdue quests</li>
     {% endfor %}
   </ul>
 </section>
 
-<!-- ACTIVE QUESTS -->
+<!-- ================= ACTIVE ================= -->
 <section class="border border-black p-4 mb-5">
   <h3 class="font-bold mb-3">Active Quests</h3>
 
-  <!-- Active quests with due dates -->
   {% if active_quests_with_due_date %}
-    <h4 class="font-semibold mt-4">With Due Date</h4>
-    <ul class="space-y-1">
+    <h4 class="font-semibold mt-4 mb-2">With Due Date</h4>
+    <ul class="space-y-2">
       {% for quest in active_quests_with_due_date %}
-        <li>{{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}] — Due: {{ quest.due_date.strftime('%d %b') }}</li>
+        <li class="border border-black p-2">
+
+          <p class="font-bold">{{ quest.title }}</p>
+          <p class="text-sm">{{ quest.description }}</p>
+
+          <p class="text-xs mt-1">
+            {{ quest.quest_type | capitalize }} • {{ quest.difficulty | capitalize }}
+            • Due: {{ quest.due_date.strftime('%d %b') }}
+          </p>
+
+          <div class="flex gap-2 mt-2">
+
+            <a href="{{ url_for('edit_quest', quest_id=quest.id) }}"
+               class="border border-black px-2 py-1 text-xs">
+              Edit
+            </a>
+
+            <form method="POST"
+                  action="{{ url_for('complete_quest', quest_id=quest.id) }}">
+              <button class="border border-black px-2 py-1 text-xs">
+                Complete
+              </button>
+            </form>
+
+            <form method="POST"
+                  action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+                  onsubmit="return confirm('Delete this quest?');">
+              <button class="border border-black px-2 py-1 text-xs">
+                Delete
+              </button>
+            </form>
+
+          </div>
+        </li>
       {% endfor %}
     </ul>
   {% else %}
     <p>No active quests with a due date</p>
   {% endif %}
 
-  <!-- Active quests with no due date -->
   {% if active_quests_no_due_date %}
-    <h4 class="font-semibold mt-4">No Due Date</h4>
-    <ul class="space-y-1">
+    <h4 class="font-semibold mt-4 mb-2">No Due Date</h4>
+    <ul class="space-y-2">
       {% for quest in active_quests_no_due_date %}
-        <li>{{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}] — No due date</li>
+        <li class="border border-black p-2">
+
+          <p class="font-bold">{{ quest.title }}</p>
+          <p class="text-sm">{{ quest.description }}</p>
+
+          <p class="text-xs mt-1">
+            {{ quest.quest_type | capitalize }} • {{ quest.difficulty | capitalize }} • No due date
+          </p>
+
+          <div class="flex gap-2 mt-2">
+
+            <a href="{{ url_for('edit_quest', quest_id=quest.id) }}"
+               class="border border-black px-2 py-1 text-xs">
+              Edit
+            </a>
+
+            <form method="POST"
+                  action="{{ url_for('complete_quest', quest_id=quest.id) }}">
+              <button class="border border-black px-2 py-1 text-xs">
+                Complete
+              </button>
+            </form>
+
+            <form method="POST"
+                  action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+                  onsubmit="return confirm('Delete this quest?');">
+              <button class="border border-black px-2 py-1 text-xs">
+                Delete
+              </button>
+            </form>
+
+          </div>
+        </li>
       {% endfor %}
     </ul>
   {% else %}
@@ -76,28 +174,70 @@
   {% endif %}
 </section>
 
-<!-- COMPLETED QUESTS -->
+<!-- ================= COMPLETED ================= -->
 <section class="border border-black p-4">
   <h3 class="font-bold mb-3">Completed Quests</h3>
-  
-  <!-- Completed quests with due dates -->
+
   {% if completed_quests_with_due_date %}
-    <h4 class="font-semibold mt-4">With Due Date</h4>
-    <ul class="space-y-1">
+    <h4 class="font-semibold mt-4 mb-2">With Due Date</h4>
+    <ul class="space-y-2">
       {% for quest in completed_quests_with_due_date %}
-        <li>✅ {{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}] — Due: {{ quest.due_date.strftime('%d %b') }}</li>
+        <li class="border border-black p-2 opacity-70">
+
+          <p class="font-bold">✅ {{ quest.title }}</p>
+          <p class="text-sm">{{ quest.description }}</p>
+
+          <p class="text-xs mt-1">
+            {{ quest.quest_type | capitalize }} • {{ quest.difficulty | capitalize }}
+            • Due: {{ quest.due_date.strftime('%d %b') }}
+          </p>
+
+          <div class="flex gap-2 mt-2">
+
+            <!-- DELETE ONLY -->
+            <form method="POST"
+                  action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+                  onsubmit="return confirm('Delete this completed quest?');">
+              <button class="border border-black px-2 py-1 text-xs">
+                Delete
+              </button>
+            </form>
+
+          </div>
+
+        </li>
       {% endfor %}
     </ul>
   {% else %}
     <p>No completed quests with a due date</p>
   {% endif %}
 
-  <!-- Completed quests with no due date -->
   {% if completed_quests_no_due_date %}
-    <h4 class="font-semibold mt-4">No Due Date</h4>
-    <ul class="space-y-1">
+    <h4 class="font-semibold mt-4 mb-2">No Due Date</h4>
+    <ul class="space-y-2">
       {% for quest in completed_quests_no_due_date %}
-        <li>✅ {{ quest.title }} — [{{ quest.quest_type | capitalize }}] — [{{ quest.difficulty | capitalize }}] — No due date</li>
+        <li class="border border-black p-2 opacity-70">
+
+          <p class="font-bold">✅ {{ quest.title }}</p>
+          <p class="text-sm">{{ quest.description }}</p>
+
+          <p class="text-xs mt-1">
+            {{ quest.quest_type | capitalize }} • {{ quest.difficulty | capitalize }} • No due date
+          </p>
+
+          <div class="flex gap-2 mt-2">
+
+            <form method="POST"
+                  action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+                  onsubmit="return confirm('Delete this completed quest?');">
+              <button class="border border-black px-2 py-1 text-xs">
+                Delete
+              </button>
+            </form>
+
+          </div>
+
+        </li>
       {% endfor %}
     </ul>
   {% else %}

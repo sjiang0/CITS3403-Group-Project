@@ -142,7 +142,55 @@ def create_quest():
         flash('Quest created successfully!', 'flash-success')
 
         return redirect(url_for('my_quests')) #TODO: decide where to redirect
-    return render_template(url_for("create_quest"))
+    return render_template("create_quest.html")
+
+
+@app.route("/quest/<int:quest_id>/delete", methods=["POST"])
+@login_required
+def delete_quest(quest_id):
+    quest = Quest.query.filter_by(id=quest_id, user_id=g.user.id).first_or_404()
+
+    db.session.delete(quest)
+    db.session.commit()
+
+    flash("Quest deleted.", "flash-success")
+    return redirect(url_for("my_quests"))
+
+@app.route("/quest/<int:quest_id>/complete", methods=["POST"])
+@login_required
+def complete_quest(quest_id):
+    quest = Quest.query.filter_by(id=quest_id, user_id=g.user.id).first_or_404()
+
+    quest.mark_completed()
+    db.session.commit()
+
+    flash("Quest completed!", "flash-success")
+    return redirect(url_for("my_quests"))
+
+
+@app.route("/quest/<int:quest_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_quest(quest_id):
+    quest = Quest.query.filter_by(id=quest_id, user_id=g.user.id).first_or_404()
+
+    if request.method == "POST":
+        due_date = request.form.get("due_date")
+        due_date_obj = datetime.strptime(due_date, "%Y-%m-%d").date() if due_date else None
+
+        quest.update_from_form(
+            request.form.get("title"),
+            request.form.get("description"),
+            request.form.get("quest_type"),
+            request.form.get("difficulty"),
+            due_date_obj
+        )
+
+        db.session.commit()
+
+        flash("Quest updated.", "flash-success")
+        return redirect(url_for("my_quests"))
+
+    return render_template("edit_quest.html", quest=quest)
 
 
 @app.route("/login", methods=["GET", "POST"])
