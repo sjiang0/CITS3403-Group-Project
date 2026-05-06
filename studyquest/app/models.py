@@ -18,6 +18,17 @@ class Quest(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', back_populates='quests')
 
+    def mark_completed(self):
+        self.status = "Completed"
+        self.date_completed = date.today()
+
+    def update_from_form(self, title, description, quest_type, difficulty, due_date):
+        self.title = title
+        self.description = description
+        self.quest_type = quest_type
+        self.difficulty = difficulty
+        self.due_date = due_date
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
