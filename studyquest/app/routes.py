@@ -167,6 +167,18 @@ def complete_quest(quest_id):
     flash("Quest completed!", "flash-success")
     return redirect(url_for("my_quests"))
 
+@app.route("/quest/<int:quest_id>/uncomplete", methods=["POST"])
+@login_required
+def uncomplete_quest(quest_id):
+    quest = Quest.query.filter_by(id=quest_id, user_id=g.user.id).first_or_404()
+
+    quest.status = "In Progress"
+    quest.date_completed = None
+
+    db.session.commit()
+
+    flash("Quest moved back to active.", "flash-success")
+    return redirect(url_for("my_quests"))
 
 @app.route("/quest/<int:quest_id>/edit", methods=["GET", "POST"])
 @login_required

@@ -194,6 +194,15 @@
 
           <div class="flex gap-2 mt-2">
 
+            <!--UNCOMPLETE-->
+            <div class="flex gap-2 mt-2">
+            <form method="POST"
+                  action="{{ url_for('uncomplete_quest', quest_id=quest.id) }}">
+              <button class="border border-black px-2 py-1 text-xs">
+                Uncomplete
+              </button>
+            </form>
+
             <!-- DELETE ONLY -->
             <form method="POST"
                   action="{{ url_for('delete_quest', quest_id=quest.id) }}"
