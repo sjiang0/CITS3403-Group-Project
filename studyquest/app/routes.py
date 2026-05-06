@@ -124,7 +124,21 @@ def create_quest():
         if errors:
             for e in errors:
                 flash(e, "flash-error")
-            return redirect(url_for("create_quest"))
+            #return redirect(url_for("create_quest"))
+            return render_template(url_for("create_quest.html"))
+        
+        new_quest = Quest(
+            title=title,
+            description=description,
+            quest_type=quest_type,
+            difficulty=difficulty,
+            due_date=due_date_obj,
+            user_id=g.user.id,
+            status="In Progress"
+        )
+
+        db.session.add(new_quest)
+        db.session.commit()
 
         flash('Quest created successfully!', 'flash-success')
 
