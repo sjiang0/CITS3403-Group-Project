@@ -4,47 +4,92 @@
 
 {% block content %}
 
-<h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+<div class="page-header">
+  <h2 class="text-2xl font-bold">Dashboard</h2>
+</div>
 
 <!-- XP SECTION -->
-<section class="border border-black p-4 mb-5">
-  <p class="mb-2">Level 3</p>
+<section class="card mb-5">
 
-  <!-- XP BAR -->
-  <div class="border border-black h-3 w-full mb-2">
-    <div class="w-2/3 h-full bg-black"></div>
+  <div>
+    <p class="font-semibold mb-2">Level 3</p>
+
+    <div class="xp-bar-container" style="width: 100%;">
+      <div class="xp-bar-fill" style="width: 66%;"></div>
+    </div>
+
+    <p class="xp-label">120 / 200 XP</p>
   </div>
 
-  <p>120 / 200 XP</p>
 </section>
 
 <!-- PROGRESS SNAPSHOT -->
-<section class="border border-black p-4 mb-5">
+<section class="card mb-5">
   <h3 class="font-bold mb-3">Progress Snapshot</h3>
 
-  <div class="grid grid-cols-2 gap-4 text-sm">
+  <div class="grid-stats text-sm">
 
-    <p>📌 Completed this week: <strong>3</strong></p>
-    <p>🔥 Current streak: <strong>4 days</strong></p>
-    <p>🏆 Rank: <strong>#3</strong></p>
-    <p>📊 Completion rate: <strong>62%</strong></p>
+    <div class="stat-card">
+      <div class="stat-value">3</div>
+      <div class="stat-label">Completed this week</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">4</div>
+      <div class="stat-label">Day streak</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">#3</div>
+      <div class="stat-label">Rank</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">62%</div>
+      <div class="stat-label">Completion rate</div>
+    </div>
 
   </div>
 </section>
 
 <!-- ACTIVE QUESTS -->
-<section class="border border-black p-4">
+<section class="card">
   <h3 class="font-bold mb-3">Active Quests</h3>
 
-    <ul class="space-y-1">
+  <ul class="space-y-2">
     {% for quest in quests %}
-      <li>
-        <strong>{{ quest.title }}</strong> — [{{ quest.difficulty }}]
+      <li class="quest-item"
+          data-difficulty="{{ quest.difficulty|lower }}">
+
+        <div class="quest-body">
+
+          <div class="quest-title">
+            {{ quest.title }}
+          </div>
+
+          <div class="quest-meta">
+            {{ quest.quest_type | capitalize }} •
+            {{ quest.difficulty | capitalize }}
+
+            {% if quest.description %}
+              • {{ quest.description }}
+            {% endif %}
+
+            {% if quest.due_date %}
+              • Due: {{ quest.due_date.strftime('%d %b') }}
+            {% else %}
+              • No due date
+            {% endif %}
+          </div>
+
+        </div>
+
       </li>
     {% else %}
       <li>No active quests at the moment.</li>
     {% endfor %}
   </ul>
+
 </section>
 
 {% endblock %}
