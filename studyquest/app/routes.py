@@ -15,10 +15,8 @@ def login_required(f):
 @app.before_request
 def load_logged_in_user():
     g.user = None
-    if g.user is None:
-        return redirect(url_for("login"))
     if "user_id" in session:
-        g.user = db.session.get(session["user_id"])
+        g.user = db.session.get(User, session["user_id"])
 
 @app.route("/") 
 @app.route("/dashboard")
