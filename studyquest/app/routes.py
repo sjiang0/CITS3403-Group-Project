@@ -12,13 +12,23 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+@app.before_request
+def load_logged_in_user():
+    g.user = None
+    if g.user is None:
+        return redirect(url_for("login"))
+    if "user_id" in session:
+        g.user = db.session.get(session["user_id"])
+
 @app.route("/") 
 @app.route("/dashboard")
 @login_required
 def dashboard():
     # Query database for active quests with due dates, ordered by due date
-    active_quests = Quest.query.filter_by(status="In Progress")\
-        .filter(Quest.due_date.isnot(None))\
+    active_quests = Quest.query.filter_by(
+        user_id = g.user.id,
+        status="In Progress"
+        ).filter(Quest.due_date.isnot(None))\
         .order_by(Quest.due_date.asc()).all()
         
     return render_template('dashboard.html', quests=active_quests)
@@ -26,8 +36,14 @@ def dashboard():
 @app.route("/my-quests")
 @login_required
 def my_quests():
-    active_q = Quest.query.filter_by(status="In Progress").all()
-    completed_q = Quest.query.filter_by(status="Completed").all()
+    active_q = Quest.query.filter_by(
+        user_id = g.user.id,
+        status="In Progress"
+        ).all()
+    completed_q = Quest.query.filter_by(
+        user_id = g.user.id,
+        status="Completed"
+        ).all()
     
     active_with_due = sorted([q for q in active_q if q.due_date], key=lambda x: x.due_date)
     active_no_due = [q for q in active_q if not q.due_date]
@@ -36,12 +52,13 @@ def my_quests():
     completed_no_due = [q for q in completed_q if not q.due_date]
     
     overdue_quests = Quest.query.filter(
+        Quest.user_id == g.user.id,
         Quest.status != "Completed",
         Quest.due_date < date.today()
     ).order_by(Quest.due_date.asc()).all()
 
     counts = {
-        "total": Quest.query.count(),
+        "total": Quest.query.filter_by(user_id=g.user.id).count(),
         "active": len(active_q),
         "completed": len(completed_q),
         "overdue": len(overdue_quests)
