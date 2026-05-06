@@ -124,8 +124,7 @@ def create_quest():
         if errors:
             for e in errors:
                 flash(e, "flash-error")
-            #return redirect(url_for("create_quest"))
-            return render_template(url_for("create_quest.html"))
+            return redirect(url_for("create_quest"))
         
         new_quest = Quest(
             title=title,
@@ -142,8 +141,8 @@ def create_quest():
 
         flash('Quest created successfully!', 'flash-success')
 
-        return redirect(url_for('dashboard')) #TODO: decide where to redirect
-    return render_template("create_quest.html")
+        return redirect(url_for('my_quests')) #TODO: decide where to redirect
+    return render_template(url_for("create_quest"))
 
 
 @app.route("/login", methods=["GET", "POST"])
