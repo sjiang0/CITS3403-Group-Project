@@ -15,12 +15,26 @@ class Quest(db.Model):
     status = db.Column(db.String(50), default="In Progress")
     date_completed = db.Column(db.Date, nullable=True)
 
+    xp = db.Column(db.Integer, default=0)
+    streak = db.Column(db.Integer, default=0)
+    last_active = db.Column(db.Date, nullable=True)
+
+    xp_reward = db.Column(db.Integer, default=10)
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', back_populates='quests')
 
     def mark_completed(self):
         self.status = "Completed"
         self.date_completed = date.today()
+
+        # give XP
+        xp_map = {
+            "easy": 10,
+            "medium": 20,
+            "hard": 40
+        }
+        self.xp_reward = xp_map.get(self.difficulty, 10)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
