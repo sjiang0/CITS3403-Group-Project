@@ -1,5 +1,5 @@
 from app import app,db
-from flask import render_template, request, redirect, url_for, flash, session, g
+from flask import render_template, jsonify, request, redirect, url_for, flash, session, g
 from app.models import User,Quest
 from datetime import datetime, date
 from functools import wraps
@@ -188,8 +188,14 @@ def delete_quest(quest_id):
     db.session.delete(quest)
     db.session.commit()
 
+    # AJAX 
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return jsonify({"success": True})
+
+    # fallback
     flash("Quest deleted.", "flash-success")
     return redirect(url_for("my_quests"))
+
 
 @app.route("/quest/<int:quest_id>/complete", methods=["POST"])
 @login_required
@@ -215,6 +221,15 @@ def complete_quest(quest_id):
 
     db.session.commit()
 
+    # AJAX
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return jsonify({
+            "success": True,
+            "quest_id": quest.id,
+            "status": "completed"
+        })
+    
+    # fallback
     flash("Quest completed!", "flash-success")
     return redirect(url_for("my_quests"))
 
@@ -228,6 +243,15 @@ def uncomplete_quest(quest_id):
 
     db.session.commit()
 
+    # AJAX response
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return jsonify({
+            "success": True,
+            "quest_id": quest.id,
+            "status": "active"
+        })
+
+    # fallback 
     flash("Quest moved back to active.", "flash-success")
     return redirect(url_for("my_quests"))
 

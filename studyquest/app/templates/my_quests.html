@@ -47,6 +47,7 @@
     {% for quest in overdue_quests %}
       <li class="quest-item"
           data-status="overdue"
+          data-due-date="{{ quest.due_date }}"
           data-difficulty="{{ quest.difficulty|lower }}"
           data-type="{{ quest.quest_type|lower }}">
 
@@ -69,15 +70,17 @@
           {% endif %}
 
           {% if quest.status != "Completed" %}
-          <form method="POST" action="{{ url_for('complete_quest', quest_id=quest.id) }}">
+          <form method="POST"
+                action="{{ url_for('complete_quest', quest_id=quest.id) }}"
+                class="complete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-outline btn-sm">Complete</button>
           </form>
           {% endif %}
 
           <form method="POST"
-          action="{{ url_for('delete_quest', quest_id=quest.id) }}"
-          class="delete-form">
+                action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+                class="delete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn-danger btn-sm">
               Delete
@@ -101,9 +104,10 @@
 
     {% for quest in active_quests_with_due_date %}
       <li class="quest-item"
-      data-status="active"
-      data-difficulty="{{ quest.difficulty|lower }}"
-      data-type="{{ quest.quest_type|lower }}">
+          data-status="active"
+          data-due-date="{{ quest.due_date }}"
+          data-difficulty="{{ quest.difficulty|lower }}"
+          data-type="{{ quest.quest_type|lower }}">
 
         <div class="quest-body">
 
@@ -119,13 +123,15 @@
 
         <div class="quest-actions">
           <a href="{{ url_for('edit_quest', quest_id=quest.id) }}" class="btn btn-outline btn-sm">Edit</a>
-          <form method="POST" action="{{ url_for('complete_quest', quest_id=quest.id) }}">
+          <form method="POST"
+                action="{{ url_for('complete_quest', quest_id=quest.id) }}"
+                class="complete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-outline btn-sm">Complete</button>
           </form>
           <form method="POST"
-          action="{{ url_for('delete_quest', quest_id=quest.id) }}"
-          class="delete-form">
+                action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+                class="delete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn-danger btn-sm">
               Delete
@@ -138,9 +144,10 @@
 
     {% for quest in active_quests_no_due_date %}
       <li class="quest-item"
-      data-status="active"
-      data-difficulty="{{ quest.difficulty|lower }}"
-      data-type="{{ quest.quest_type|lower }}">
+          data-status="active"
+          data-due-date=""
+          data-difficulty="{{ quest.difficulty|lower }}"
+          data-type="{{ quest.quest_type|lower }}">
 
         <div class="quest-body">
 
@@ -156,13 +163,15 @@
 
         <div class="quest-actions">
           <a href="{{ url_for('edit_quest', quest_id=quest.id) }}" class="btn btn-outline btn-sm">Edit</a>
-          <form method="POST" action="{{ url_for('complete_quest', quest_id=quest.id) }}">
+          <form method="POST"
+                action="{{ url_for('complete_quest', quest_id=quest.id) }}"
+                class="complete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-outline btn-sm">Complete</button>
           </form>
           <form method="POST"
-          action="{{ url_for('delete_quest', quest_id=quest.id) }}"
-          class="delete-form">
+                action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+                class="delete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn-danger btn-sm">
               Delete
@@ -184,9 +193,10 @@
 
     {% for quest in completed_quests_with_due_date + completed_quests_no_due_date %}
       <li class="quest-item complete"
-      data-status="completed"
-      data-difficulty="{{ quest.difficulty|lower }}"
-      data-type="{{ quest.quest_type|lower }}">
+          data-status="completed"
+          data-due-date="{{ quest.due_date }}"
+          data-difficulty="{{ quest.difficulty|lower }}"
+          data-type="{{ quest.quest_type|lower }}">
 
         <div class="quest-body">
 
@@ -207,14 +217,14 @@
 
         <div class="quest-actions">
 
-          <form method="POST" action="{{ url_for('uncomplete_quest', quest_id=quest.id) }}">
+          <form method="POST" action="{{ url_for('uncomplete_quest', quest_id=quest.id) }}" class="uncomplete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-gold btn-sm">Uncomplete</button>
           </form>
 
           <form method="POST"
-          action="{{ url_for('delete_quest', quest_id=quest.id) }}"
-          class="delete-form">
+                action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+                class="delete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn-danger btn-sm">
               Delete
