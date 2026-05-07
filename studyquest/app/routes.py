@@ -55,6 +55,13 @@ def dashboard():
     # Streak
     streak = g.user.streak or 0
 
+    # Rank
+    all_users = User.query.order_by(User.xp.desc()).all()
+    rank = next(
+        (i + 1 for i, u in enumerate(all_users) if u.id == g.user.id),
+        None
+    )
+
     # Completed quests (for weekly stats)
     completed_quests = Quest.query.filter_by(
         user_id=g.user.id,
@@ -76,6 +83,7 @@ def dashboard():
         quests=active_quests,
         xp=xp,
         level=level,
+        rank=rank,
         xp_into_level=xp_into_level,
         xp_percent=xp_percent,
         streak=streak,

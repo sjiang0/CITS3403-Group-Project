@@ -21,7 +21,7 @@
     <p class="font-semibold mb-2">Level {{ level }}</p>
 
     <div class="xp-bar-container" style="width: 100%;">
-      <div class="xp-bar-fill" style="--xp: {{ xp_percent | int }}%;"></div>
+        <div class="xp-bar-fill" style="--xp: {{ xp_percent|int if xp_percent|int > 2 else 2 }}%;"></div>
     </div>
     <p class="xp-label">
       {{ xp_into_level }} / 100 XP
@@ -51,7 +51,7 @@
     </div>
 
     <div class="stat-card">
-      <div class="stat-value">#{{ level }}</div>
+      <div class="stat-value">#{{ rank }}</div>
       <div class="stat-label">Rank</div>
     </div>
 
