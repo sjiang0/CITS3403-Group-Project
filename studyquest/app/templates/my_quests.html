@@ -166,7 +166,7 @@
   <ul class="space-y-2">
 
     {% for quest in completed_quests_with_due_date + completed_quests_no_due_date %}
-      <li class="quest-item"
+      <li class="quest-item complete"
       data-status="completed"
       data-difficulty="{{ quest.difficulty|lower }}"
       data-type="{{ quest.quest_type|lower }}">
