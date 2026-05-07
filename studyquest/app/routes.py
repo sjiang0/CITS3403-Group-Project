@@ -69,25 +69,35 @@ def dashboard():
 @app.route("/my-quests")
 @login_required
 def my_quests():
-    active_q = Quest.query.filter_by(
-        user_id = g.user.id,
-        status="In Progress"
-        ).all()
+    today = date.today()
+
+    active_q = Quest.query.filter(
+        Quest.user_id == g.user.id,
+        Quest.status == "In Progress",
+        (Quest.due_date == None) | (Quest.due_date >= today)
+    ).all()
+
     completed_q = Quest.query.filter_by(
-        user_id = g.user.id,
+        user_id=g.user.id,
         status="Completed"
-        ).all()
-    
-    active_with_due = sorted([q for q in active_q if q.due_date], key=lambda x: x.due_date)
+    ).all()
+
+    active_with_due = sorted(
+        [q for q in active_q if q.due_date],
+        key=lambda x: x.due_date
+    )
     active_no_due = [q for q in active_q if not q.due_date]
-    
-    completed_with_due = sorted([q for q in completed_q if q.due_date], key=lambda x: x.due_date)
+
+    completed_with_due = sorted(
+        [q for q in completed_q if q.due_date],
+        key=lambda x: x.due_date
+    )
     completed_no_due = [q for q in completed_q if not q.due_date]
-    
+
     overdue_quests = Quest.query.filter(
         Quest.user_id == g.user.id,
         Quest.status != "Completed",
-        Quest.due_date < date.today()
+        Quest.due_date < today
     ).order_by(Quest.due_date.asc()).all()
 
     counts = {
