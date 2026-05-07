@@ -21,20 +21,34 @@
 <section class="card mb-5">
   <h3 class="font-bold mb-2">Filter Quests</h3>
   <div class="flex gap-2 flex-wrap">
-    <button class="btn btn-outline btn-sm">All</button>
-    <button class="btn btn-outline btn-sm">Active</button>
-    <button class="btn btn-outline btn-sm">Completed</button>
-    <button class="btn btn-outline btn-sm">Overdue</button>
+      <button class="btn btn-gold btn-sm filter-btn" id="all-btn">All</button>
+
+      <button class="btn btn-outline btn-sm filter-btn" data-section="active">Active</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-section="completed">Completed</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-section="overdue">Overdue</button>
+  </div>
+  <div class="flex gap-2 flex-wrap mt-3">
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-difficulty="easy">Easy</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-difficulty="medium">Medium</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-difficulty="hard">Hard</button>
+
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-type="study">Study</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-type="exam prep">Exam Prep</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-type="personal">Personal</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-type="assignment">Assignment</button>
   </div>
 </section>
 
 <!-- ================= OVERDUE ================= -->
-<section class="card mb-5">
+<section class="card mb-5" id="overdue-section">
   <h3 class="font-bold mb-3">Overdue Quests</h3>
 
   <ul class="space-y-2">
     {% for quest in overdue_quests %}
-      <li class="quest-item" data-difficulty="{{ quest.difficulty|lower }}">
+      <li class="quest-item"
+          data-status="overdue"
+          data-difficulty="{{ quest.difficulty|lower }}"
+          data-type="{{ quest.quest_type|lower }}">
 
         <div class="quest-body">
 
@@ -75,13 +89,16 @@
 </section>
 
 <!-- ================= ACTIVE ================= -->
-<section class="card mb-5">
+<section class="card mb-5" id="active-section">
   <h3 class="font-bold mb-3">Active Quests</h3>
 
   <ul class="space-y-2">
 
     {% for quest in active_quests_with_due_date %}
-      <li class="quest-item" data-difficulty="{{ quest.difficulty|lower }}">
+      <li class="quest-item"
+      data-status="active"
+      data-difficulty="{{ quest.difficulty|lower }}"
+      data-type="{{ quest.quest_type|lower }}">
 
         <div class="quest-body">
 
@@ -109,7 +126,10 @@
     {% endfor %}
 
     {% for quest in active_quests_no_due_date %}
-      <li class="quest-item" data-difficulty="{{ quest.difficulty|lower }}">
+      <li class="quest-item"
+      data-status="active"
+      data-difficulty="{{ quest.difficulty|lower }}"
+      data-type="{{ quest.quest_type|lower }}">
 
         <div class="quest-body">
 
@@ -140,13 +160,16 @@
 </section>
 
 <!-- ================= COMPLETED ================= -->
-<section class="card p-4">
+<section class="card p-4" id="completed-section">
   <h3 class="font-bold mb-3">Completed Quests</h3>
 
   <ul class="space-y-2">
 
     {% for quest in completed_quests_with_due_date + completed_quests_no_due_date %}
-      <li class="quest-item complete" data-difficulty="{{ quest.difficulty|lower }}">
+      <li class="quest-item"
+      data-status="completed"
+      data-difficulty="{{ quest.difficulty|lower }}"
+      data-type="{{ quest.quest_type|lower }}">
 
         <div class="quest-body">
 
@@ -184,5 +207,5 @@
 
   </ul>
 </section>
-
+<script src="{{ url_for('static', filename='js/quest-filters.js') }}"></script>
 {% endblock %}
