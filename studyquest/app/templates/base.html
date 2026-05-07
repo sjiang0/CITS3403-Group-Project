@@ -2,68 +2,70 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Study Quest{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  {% block extra_head %}{% endblock %}
 </head>
+<body>
 
-<body class="m-0 font-sans">
-
-<div class="flex min-h-screen">
-
-  <!-- SIDEBAR -->
-  {% if is_logged_in %}
-  <aside class="w-64 border-r border-black p-5 flex flex-col justify-evenly">
-
-    <!-- LOGO -->
+<aside id="sidebar">
+  <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">
+    <span class="brand-icon">🌸</span>
     <div>
-      <h2 class="text-xl font-bold">Study Quest</h2>
+      <div class="brand-name">Study Quest</div>
+      <div class="brand-tagline">bloom · grow · thrive</div>
     </div>
+  </a>
 
-    <!-- NAV -->
-    <div>
-      <nav class="space-y-2">
-        <a href="{{ url_for('dashboard') }}" class="block">Dashboard</a>
-        <a href="{{ url_for('my_quests') }}" class="block">My Quests</a>
-        <a href="#" class="block">Leaderboard</a>
-        <a href="#" class="block">Profile</a>
-      </nav>
-    </div>
+  <nav class="sidebar-nav">
+    <a href="{{ url_for('main.dashboard') }}"
+       class="nav-item {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+      <span class="nav-icon">🏡</span> My Cottage
+    </a>
+    <a href="{{ url_for('main.my_quests') }}"
+       class="nav-item {% if request.endpoint == 'main.my_quests' %}active{% endif %}">
+      <span class="nav-icon">📜</span> My Quests
+    </a>
+    <a href="{{ url_for('main.leaderboard') }}"
+       class="nav-item {% if request.endpoint == 'main.leaderboard' %}active{% endif %}">
+      <span class="nav-icon">🏆</span> Leaderboard
+    </a>
+  </nav>
+</aside>
 
-    <!-- USER INFO -->
-    <div>
-      <p><strong>Username</strong></p>
-      <p>Level 3</p>
-      <p>120 / 200 XP</p>
-    </div>
+<main id="main-content">
 
-    <div>
-       <form action="{{ url_for('logout') }}" method="POST">
-        <button type="submit" class="border border-black px-3 py-1">Logout</button>
-       </form>
-    </div>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">
+            {{ message }}
+            <button onclick="this.closest('.flash').remove()">✕</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
 
-  </aside>
-  {% endif %}
+  {% block content %}{% endblock %}
 
-  <!-- MAIN CONTENT -->
-  <main class="flex-1 p-8 max-w-3xl mx-auto">
+</main>
 
-    <!-- FLOATING BUTTON -->
-    <div class="fixed top-5 right-5">
-      <a href="{{ url_for('create_quest') }}"
-         class="border border-black px-3 py-1 inline-block">
-        + NEW QUEST
-      </a>
-    </div>
+{% if current_user.is_authenticated %}
+<a href="{{ url_for('main.my_quests') }}"
+   style="position:fixed; bottom:24px; right:24px; z-index:999;"
+   class="btn btn-primary">
+  + New Quest
+</a>
+{% endif %}
 
-    <!-- PAGE-SPECIFIC CONTENT GOES HERE -->
-    {% block content %}{% endblock %}
-
-  </main>
-
-</div>
-
+{% block extra_scripts %}{% endblock %}
 </body>
 </html>
