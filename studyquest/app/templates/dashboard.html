@@ -65,7 +65,7 @@
 
 <!-- ACTIVE QUESTS -->
 <section class="card">
-  <h3 class="font-bold mb-3">Active Quests</h3>
+  <h3 class="font-bold mb-3">Priority Quests</h3>
 
   <ul class="space-y-2">
     {% for quest in quests %}
@@ -75,6 +75,9 @@
         <div class="quest-body">
 
           <div class="quest-title">
+            {% if quest.due_date and quest.due_date < g.user.last_active.__class__.today() %}
+              ❌
+            {% endif %}
             {{ quest.title }}
           </div>
 

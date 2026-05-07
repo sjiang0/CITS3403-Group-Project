@@ -22,12 +22,29 @@ def load_logged_in_user():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    # Active quests with due dates
-    active_quests = Quest.query.filter_by(
-        user_id=g.user.id,
-        status="In Progress"
-    ).filter(Quest.due_date.isnot(None)) \
-     .order_by(Quest.due_date.asc()).all()
+    # extract 3 active quests. 
+    # priority order: overdue > active with due date > active no due date
+    today = date.today()
+
+    overdue_quests = Quest.query.filter(
+        Quest.user_id == g.user.id,
+        Quest.status == "In Progress",
+        Quest.due_date < today
+    ).order_by(Quest.due_date.asc()).all()
+
+    upcoming_quests = Quest.query.filter(
+        Quest.user_id == g.user.id,
+        Quest.status == "In Progress",
+        Quest.due_date >= today
+    ).order_by(Quest.due_date.asc()).all()
+
+    no_due_quests = Quest.query.filter(
+        Quest.user_id == g.user.id,
+        Quest.status == "In Progress",
+        Quest.due_date == None
+    ).all()
+
+    active_quests = (overdue_quests + upcoming_quests + no_due_quests)[:3]
 
     # XP + Level
     xp = g.user.xp or 0
