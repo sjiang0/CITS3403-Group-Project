@@ -87,7 +87,7 @@
             {% endif %}
 
             {% if quest.due_date %}
-              • Due: {{ quest.due_date.strftime('%d %b') }}
+              <strong>• Due: {{ quest.due_date.strftime('%d %b') }}</strong>
             {% else %}
               • No due date
             {% endif %}

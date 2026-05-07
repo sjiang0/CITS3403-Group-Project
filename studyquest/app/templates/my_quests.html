@@ -75,10 +75,13 @@
           </form>
           {% endif %}
 
-          <form method="POST" action="{{ url_for('delete_quest', quest_id=quest.id) }}"
-                onsubmit="return confirm('Delete this quest?');">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn btn-danger btn-sm">Delete</button>
+          <form method="POST"
+          action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+          class="delete-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger btn-sm">
+              Delete
+            </button>
           </form>
 
         </div>
@@ -120,9 +123,13 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-outline btn-sm">Complete</button>
           </form>
-          <form method="POST" action="{{ url_for('delete_quest', quest_id=quest.id) }}">
+          <form method="POST"
+          action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+          class="delete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn btn-danger btn-sm">Delete</button>
+            <button type="submit" class="btn btn-danger btn-sm">
+              Delete
+            </button>
           </form>
         </div>
 
@@ -153,9 +160,13 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-outline btn-sm">Complete</button>
           </form>
-          <form method="POST" action="{{ url_for('delete_quest', quest_id=quest.id) }}">
+          <form method="POST"
+          action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+          class="delete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn btn-danger btn-sm">Delete</button>
+            <button type="submit" class="btn btn-danger btn-sm">
+              Delete
+            </button>
           </form>
         </div>
 
@@ -201,9 +212,13 @@
             <button class="btn btn-gold btn-sm">Uncomplete</button>
           </form>
 
-          <form method="POST" action="{{ url_for('delete_quest', quest_id=quest.id) }}">
+          <form method="POST"
+          action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+          class="delete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn btn-danger btn-sm">Delete</button>
+            <button type="submit" class="btn btn-danger btn-sm">
+              Delete
+            </button>
           </form>
 
         </div>
@@ -216,4 +231,5 @@
   </ul>
 </section>
 <script src="{{ url_for('static', filename='js/quest-filters.js') }}"></script>
+<script src="{{ url_for('static', filename='js/quest-actions.js') }}"></script>
 {% endblock %}
