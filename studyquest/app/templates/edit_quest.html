@@ -9,7 +9,7 @@
 <section class="card">
 
   <form method="POST" action="{{ url_for('edit_quest', quest_id=quest.id) }}" id="quest_form">
-
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <!-- QUEST TITLE -->
     <div class="form-group">
       <label class="form-label">Quest Title</label>
