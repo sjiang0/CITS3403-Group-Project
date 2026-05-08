@@ -1,8 +1,10 @@
-from app import app,db
+from app import app,db,limiter
 from flask import render_template, jsonify, request, redirect, url_for, flash, session, g
 from app.models import User,Quest
 from datetime import datetime, date
 from functools import wraps
+from app.security import is_strong_password
+from flask_limiter.errors import RateLimitExceeded
 
 def login_required(f):
     @wraps(f)
@@ -11,6 +13,12 @@ def login_required(f):
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated_function
+
+#flash rate limit error instead of causing 429 too many requests -jacob
+@app.errorhandler(RateLimitExceeded)
+def handle_rate_limit(e):
+    flash(str(e.description), "flash-error")
+    return redirect(request.referrer or url_for("login"))
 
 @app.before_request
 def load_logged_in_user():
@@ -353,6 +361,7 @@ def edit_quest(quest_id):
 
 
 @app.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute", methods=["POST"], error_message="Too many login attempts, please try again in a minute.")
 def login():
     if request.method == "POST":
         username = request.form["username"].lower().strip()
@@ -383,10 +392,23 @@ def logout():
     return redirect(url_for("login"))
 
 @app.route("/register", methods=["GET", "POST"])
+@limiter.limit("20 per hour", methods=["POST"], error_message="Too many registrations, please try again in an hour.")
 def register():
     if request.method == "POST":
         username = request.form["username"].lower().strip()
+        if len(username) < 3: #added username must be atleast 3 digits check
+            flash("Username must be at least 3 characters.", "flash-error")
+            return redirect(url_for("register"))
         password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+
+        if password != confirm_password:
+            flash("Passwords do not match.", "flash-error")
+            return redirect(url_for("register"))
+
+        if not is_strong_password(password):
+            flash("Password must be at least 8 characters and include letters, numbers, and special characters.", "flash-error")
+            return redirect(url_for("register"))
 
         if User.query.filter_by(username=username).first():
             flash("Username already exists.", "flash-error")
