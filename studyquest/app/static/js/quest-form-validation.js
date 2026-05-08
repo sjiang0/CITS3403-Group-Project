@@ -1,3 +1,7 @@
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("quest_form").addEventListener("submit", validateForm);
+});
+
 function validateForm(event) {
     clearErrors();
 
@@ -5,6 +9,7 @@ function validateForm(event) {
     const description = document.getElementById('description').value;
     const questType = document.getElementById('quest_type').value;
     const difficulty = document.getElementById('difficulty').value;
+    const dueDate = document.getElementById('due_date').value;
 
     let isValid = true;
 
@@ -15,6 +20,9 @@ function validateForm(event) {
 
     if (description.trim() === '') {
         document.getElementById('description-error').textContent = 'Description is required.';
+        isValid = false;
+    } else if (description.length < 10) {
+        document.getElementById('description-error').textContent = 'Description must be at least 10 characters.';
         isValid = false;
     }
 
@@ -27,6 +35,18 @@ function validateForm(event) {
         document.getElementById('difficulty-error').textContent = 'Please select a difficulty.';
         isValid = false;
     }
+
+    if (dueDate) {
+        const selectedDate = new Date(dueDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (selectedDate < today) {
+            document.getElementById('due_date-error').textContent =  'Due date cannot be in the past.';
+            isValid = false;
+        }
+    }
+
     if (!isValid) {
         event.preventDefault(); 
     }
@@ -39,4 +59,5 @@ function clearErrors() {
     document.getElementById('description-error').textContent = '';
     document.getElementById('quest_type-error').textContent = '';
     document.getElementById('difficulty-error').textContent = '';
+    document.getElementById('due_date-error').textContent = '';
 }

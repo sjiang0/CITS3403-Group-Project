@@ -8,8 +8,8 @@
 
 <section class="card">
 
-  <form method="POST" action="{{ url_for('create_quest') }}" onsubmit="return validateForm(event)">
-
+  <form method="POST" action="{{ url_for('create_quest') }}" id="quest_form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <!-- QUEST TITLE -->
     <div class="form-group">
       <label class="form-label">Quest Title</label>
@@ -54,6 +54,7 @@
       <label class="form-label">Due Date</label>
       <input name="due_date" type="date" class="form-input" id="due_date" >
       <p class="text-sm text-gray-500">Optional</p>
+      <span id="due_date-error" class="form-error"></span>
     </div>
 
     <!-- SUBMIT -->

@@ -240,6 +240,7 @@ img { max-width: 100%; display: block; }
   background: linear-gradient(90deg, var(--honey), var(--honey-light));
   transition: width .9s cubic-bezier(.4,0,.2,1);
   position: relative; overflow: hidden;
+  width: var(--xp, 1%);
 }
 .xp-bar-fill::after {
   content: ''; position: absolute; inset: 0;
