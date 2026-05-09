@@ -4,7 +4,12 @@ __pycache__/
 
 # Virtual environment
 venv/
+.venv/
 application-env/
+
+# pytest
+.pytest_cache/
+selenium_test.db
 
 # Flask instance/data (if any later)
 instance/
