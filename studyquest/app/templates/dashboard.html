@@ -6,15 +6,15 @@
 
 <div class="page-header">
   <h2 class="text-2xl font-bold">
-    Welcome back, {{ g.user.username }}!
+    Welcome back, {{ current_user.username }}!
   </h2>
 </div>
 
 <!-- XP SECTION -->
 <section class="card mb-5">
 
-  {% set level = (g.user.xp // 100) + 1 %}
-  {% set xp_into_level = g.user.xp % 100 %}
+  {% set level = (current_user.xp // 100) + 1 %}
+  {% set xp_into_level = current_user.xp % 100 %}
   {% set xp_percent = xp_into_level %}
 
   <div>
@@ -45,7 +45,7 @@
 
     <div class="stat-card">
       <div class="stat-value">
-        {{ g.user.streak }}
+        {{ current_user.streak }}
       </div>
       <div class="stat-label">Day streak</div>
     </div>
@@ -77,7 +77,7 @@
         <div class="quest-body">
 
           <div class="quest-title">
-            {% if quest.due_date and quest.due_date < g.user.last_active.__class__.today() %}
+            {% if quest.due_date and quest.due_date < current_user.last_active.__class__.today() %}
               ❌
             {% endif %}
             {{ quest.title }}

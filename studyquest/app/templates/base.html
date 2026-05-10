@@ -13,7 +13,7 @@
 <div class="flex min-h-screen">
 
   <!-- SIDEBAR -->
-  {% if is_logged_in %}
+  {% if current_user.is_authenticated %}
   <aside class="w-64 border-r border-black p-5 flex flex-col justify-evenly">
 
     <!-- LOGO -->
@@ -33,7 +33,7 @@
 
     <!-- USER INFO -->
     <div>
-      <p><strong>Username</strong></p>
+      <p><strong>{{ current_user.username }}</strong></p>
       <p>Level 3</p>
       <p>120 / 200 XP</p>
     </div>
@@ -51,7 +51,7 @@
   <!-- MAIN CONTENT -->
   <main class="flex-1 p-8 max-w-3xl mx-auto">
 
-    {% if is_logged_in %}
+    {% if current_user.is_authenticated %}
     <!-- FLOATING BUTTON -->
     <div class="fixed top-5 right-5">
       <a href="{{ url_for('create_quest') }}"

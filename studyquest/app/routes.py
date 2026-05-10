@@ -1,18 +1,10 @@
-from app import app,db,limiter
-from flask import render_template, jsonify, request, redirect, url_for, flash, session, g
-from app.models import User,Quest
+from app import app, db, limiter
+from flask import render_template, jsonify, request, redirect, url_for, flash
+from app.models import User, Quest
 from datetime import datetime, date
-from functools import wraps
 from app.security import is_strong_password
 from flask_limiter.errors import RateLimitExceeded
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if "user_id" not in session:
-            return redirect(url_for("login"))
-        return f(*args, **kwargs)
-    return decorated_function
+from flask_login import login_user, logout_user, login_required, current_user
 
 #flash rate limit error instead of causing 429 too many requests -jacob
 @app.errorhandler(RateLimitExceeded)
@@ -20,11 +12,6 @@ def handle_rate_limit(e):
     flash(str(e.description), "flash-error")
     return redirect(request.referrer or url_for("login"))
 
-@app.before_request
-def load_logged_in_user():
-    g.user = None
-    if "user_id" in session:
-        g.user = db.session.get(User, session["user_id"])
 
 @app.route("/") 
 @app.route("/dashboard")
@@ -35,19 +22,19 @@ def dashboard():
     today = date.today()
 
     overdue_quests = Quest.query.filter(
-        Quest.user_id == g.user.id,
+        Quest.user_id == current_user.id,
         Quest.status == "In Progress",
         Quest.due_date < today
     ).order_by(Quest.due_date.asc()).all()
 
     upcoming_quests = Quest.query.filter(
-        Quest.user_id == g.user.id,
+        Quest.user_id == current_user.id,
         Quest.status == "In Progress",
         Quest.due_date >= today
     ).order_by(Quest.due_date.asc()).all()
 
     no_due_quests = Quest.query.filter(
-        Quest.user_id == g.user.id,
+        Quest.user_id == current_user.id,
         Quest.status == "In Progress",
         Quest.due_date == None
     ).all()
@@ -55,24 +42,24 @@ def dashboard():
     active_quests = (overdue_quests + upcoming_quests + no_due_quests)[:3]
 
     # XP + Level
-    xp = g.user.xp or 0
+    xp = current_user.xp or 0
     level = (xp // 100) + 1
     xp_into_level = xp % 100
     xp_percent = round((xp_into_level / 100) * 100)
 
     # Streak
-    streak = g.user.streak or 0
+    streak = current_user.streak or 0
 
     # Rank
     all_users = User.query.order_by(User.xp.desc()).all()
     rank = next(
-        (i + 1 for i, u in enumerate(all_users) if u.id == g.user.id),
+        (i + 1 for i, u in enumerate(all_users) if u.id == current_user.id),
         None
     )
 
     # Completed quests (for weekly stats)
     completed_quests = Quest.query.filter_by(
-        user_id=g.user.id,
+        user_id=current_user.id,
         status="Completed"
     ).all()
 
@@ -83,7 +70,7 @@ def dashboard():
         if q.date_completed and (today - q.date_completed).days <= 7
     )
 
-    total_quests = Quest.query.filter_by(user_id=g.user.id).count()
+    total_quests = Quest.query.filter_by(user_id=current_user.id).count()
     completion_rate = int((len(completed_quests) / total_quests) * 100) if total_quests else 0
 
     return render_template(
@@ -105,13 +92,13 @@ def my_quests():
     today = date.today()
 
     active_q = Quest.query.filter(
-        Quest.user_id == g.user.id,
+        Quest.user_id == current_user.id,
         Quest.status == "In Progress",
         (Quest.due_date == None) | (Quest.due_date >= today)
     ).all()
 
     completed_q = Quest.query.filter_by(
-        user_id=g.user.id,
+        user_id=current_user.id,
         status="Completed"
     ).all()
 
@@ -128,13 +115,13 @@ def my_quests():
     completed_no_due = [q for q in completed_q if not q.due_date]
 
     overdue_quests = Quest.query.filter(
-        Quest.user_id == g.user.id,
+        Quest.user_id == current_user.id,
         Quest.status != "Completed",
         Quest.due_date < today
     ).order_by(Quest.due_date.asc()).all()
 
     counts = {
-        "total": Quest.query.filter_by(user_id=g.user.id).count(),
+        "total": Quest.query.filter_by(user_id=current_user.id).count(),
         "active": len(active_q),
         "completed": len(completed_q),
         "overdue": len(overdue_quests)
@@ -210,7 +197,7 @@ def create_quest():
             quest_type=quest_type,
             difficulty=difficulty,
             due_date=due_date_obj,
-            user_id=g.user.id,
+            user_id=current_user.id,
             status="In Progress"
         )
 
@@ -226,7 +213,7 @@ def create_quest():
 @app.route("/quest/<int:quest_id>/delete", methods=["POST"])
 @login_required
 def delete_quest(quest_id):
-    quest = Quest.query.filter_by(id=quest_id, user_id=g.user.id).first_or_404()
+    quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
 
     db.session.delete(quest)
     db.session.commit()
@@ -243,24 +230,23 @@ def delete_quest(quest_id):
 @app.route("/quest/<int:quest_id>/complete", methods=["POST"])
 @login_required
 def complete_quest(quest_id):
-    quest = Quest.query.filter_by(id=quest_id, user_id=g.user.id).first_or_404()
+    quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
 
     # mark quest complete + award XP + update last_active
     quest.mark_completed()
 
     # update streak logic
-    user = g.user
     today = date.today()
 
-    if user.last_active:
-        if (today - user.last_active).days == 1:
-            user.streak += 1
-        elif user.last_active != today:
-            user.streak = 1
+    if current_user.last_active:
+        if (today - current_user.last_active).days == 1:
+            current_user.streak += 1
+        elif current_user.last_active != today:
+            current_user.streak = 1
     else:
-        user.streak = 1
+        current_user.streak = 1
 
-    user.last_active = today
+    current_user.last_active = today
 
     db.session.commit()
 
@@ -279,7 +265,7 @@ def complete_quest(quest_id):
 @app.route("/quest/<int:quest_id>/uncomplete", methods=["POST"])
 @login_required
 def uncomplete_quest(quest_id):
-    quest = Quest.query.filter_by(id=quest_id, user_id=g.user.id).first_or_404()
+    quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
 
     quest.status = "In Progress"
     quest.date_completed = None
@@ -301,7 +287,7 @@ def uncomplete_quest(quest_id):
 @app.route("/quest/<int:quest_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_quest(quest_id):
-    quest = Quest.query.filter_by(id=quest_id, user_id=g.user.id).first_or_404()
+    quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
 
     if request.method == "POST":
 
@@ -377,8 +363,7 @@ def login():
             flash("Incorrect password.", "flash-error")
             return redirect(url_for("login"))
 
-        session["user_id"] = user.id
-        session["username"] = user.username
+        login_user(user)
 
         flash("Logged in successfully!", "flash-success")
         return redirect(url_for("dashboard"))
@@ -387,7 +372,7 @@ def login():
 
 @app.route("/logout", methods=["POST"])
 def logout():
-    session.clear()
+    logout_user()
     flash("You have been logged out.", "flash-info")
     return redirect(url_for("login"))
 
@@ -424,4 +409,3 @@ def register():
         return redirect(url_for("login"))
 
     return render_template("register.html")
-
