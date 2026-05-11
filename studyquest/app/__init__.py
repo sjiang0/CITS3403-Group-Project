@@ -26,4 +26,15 @@ def create_app(config_class=DeploymentConfig):
     from app.blueprints import main
     app.register_blueprint(main)
 
+    from app.xp_helpers import xp_to_level, xp_into_level, xp_to_next_level, level_title
+
+    @app.context_processor
+    def inject_xp_helpers():
+        return dict(
+            xp_to_level=xp_to_level,
+            xp_into_level=xp_into_level,
+            xp_to_next_level=xp_to_next_level,
+            level_title=level_title,
+        )
+
     return app

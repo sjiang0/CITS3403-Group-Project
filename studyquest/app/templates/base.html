@@ -34,8 +34,8 @@
     <!-- USER INFO -->
     <div>
       <p><strong>{{ current_user.username }}</strong></p>
-      <p>Level 3</p>
-      <p>120 / 200 XP</p>
+      <p>Level {{ xp_to_level(current_user.xp) }}</p>
+      <p>{{ xp_into_level(current_user.xp) }} / 100 XP</p>
     </div>
 
     <div>
