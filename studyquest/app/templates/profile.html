@@ -9,7 +9,7 @@
   </div>
   {% if not is_self %}
     <div class="page-header-actions">
-      <a href="{{ url_for('leaderboard') }}" class="btn btn-outline">← Leaderboard</a>
+      <a href="{{ url_for('main.leaderboard') }}" class="btn btn-outline">← Leaderboard</a>
     </div>
   {% endif %}
 </div>
@@ -83,7 +83,7 @@
   <p class="empty-state-text">
     {% if is_self %}Plant your first quest and start blooming!{% else %}This scholar hasn't completed any quests yet — give them time to bloom.{% endif %}
   </p>
-  {% if is_self %}<a href="{{ url_for('create_quest') }}" class="btn btn-primary">+ Plant a Quest</a>{% endif %}
+  {% if is_self %}<a href="{{ url_for('main.create_quest') }}" class="btn btn-primary">+ Plant a Quest</a>{% endif %}
 </div>
 {% endif %}
 {% endblock %}
