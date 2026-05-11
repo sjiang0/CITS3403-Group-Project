@@ -435,7 +435,7 @@ def leaderboard():
             "level": lvl,
             "title": level_title(lvl),
             "emoji": avatar_emoji(u.username),
-            "is_current": u.id == g.user.id,
+            "is_current": u.id == current_user.user.id,
         })
 
     me = next((r for r in rows if r["is_current"]), None)
@@ -455,7 +455,7 @@ def leaderboard():
 @login_required
 def profile(username=None):
     if username is None:
-        user = g.user
+        user = current_user.user
     else:
         user = User.query.filter_by(username=username.lower()).first_or_404()
 
@@ -488,7 +488,7 @@ def profile(username=None):
         completed_count=completed_count,
         recent_completed=recent_completed,
         rank=rank,
-        is_self=(user.id == g.user.id),
+        is_self=(user.id == current_user.user.id),
     )
 
 
