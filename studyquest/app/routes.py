@@ -410,3 +410,112 @@ def register():
         return redirect(url_for("login"))
 
     return render_template("register.html")
+
+# ═══════════════════════════════════════════════════════════
+# Leaderboard, Profile & User Search (Nuowei Dong)
+# ═══════════════════════════════════════════════════════════
+from app.xp_helpers import (
+    xp_to_level, xp_into_level, xp_to_next_level,
+    level_title, avatar_emoji,
+)
+
+
+@app.route("/leaderboard")
+@login_required
+def leaderboard():
+    users = User.query.order_by(User.xp.desc(), User.id.asc()).all()
+
+    rows = []
+    for i, u in enumerate(users):
+        lvl = xp_to_level(u.xp)
+        rows.append({
+            "rank": i + 1,
+            "user": u,
+            "xp": u.xp or 0,
+            "level": lvl,
+            "title": level_title(lvl),
+            "emoji": avatar_emoji(u.username),
+            "is_current": u.id == g.user.id,
+        })
+
+    me = next((r for r in rows if r["is_current"]), None)
+    next_user = rows[me["rank"] - 2] if (me and me["rank"] > 1) else None
+
+    return render_template(
+        "leaderboard.html",
+        rows=rows,
+        me=me,
+        total=len(users),
+        next_user=next_user,
+    )
+
+
+@app.route("/profile")
+@app.route("/profile/<username>")
+@login_required
+def profile(username=None):
+    if username is None:
+        user = g.user
+    else:
+        user = User.query.filter_by(username=username.lower()).first_or_404()
+
+    xp = user.xp or 0
+    lvl = xp_to_level(xp)
+
+    recent_completed = (
+        Quest.query
+        .filter_by(user_id=user.id, status="Completed")
+        .order_by(Quest.date_completed.desc(), Quest.id.desc())
+        .limit(8)
+        .all()
+    )
+
+    completed_count = Quest.query.filter_by(
+        user_id=user.id, status="Completed"
+    ).count()
+
+    rank = User.query.filter(User.xp > xp).count() + 1
+
+    return render_template(
+        "profile.html",
+        u=user,
+        xp=xp,
+        level=lvl,
+        title=level_title(lvl),
+        emoji=avatar_emoji(user.username),
+        xp_into=xp_into_level(xp),
+        xp_to_next=xp_to_next_level(xp),
+        completed_count=completed_count,
+        recent_completed=recent_completed,
+        rank=rank,
+        is_self=(user.id == g.user.id),
+    )
+
+
+@app.route("/search_users")
+@login_required
+def search_users():
+    q = (request.args.get("q") or "").strip().lower()
+    if not q:
+        return jsonify({"results": []})
+
+    matches = (
+        User.query
+        .filter(User.username.like(f"%{q}%"))
+        .order_by(User.xp.desc(), User.username.asc())
+        .limit(10)
+        .all()
+    )
+
+    results = []
+    for u in matches:
+        lvl = xp_to_level(u.xp)
+        results.append({
+            "username": u.username,
+            "xp": u.xp or 0,
+            "level": lvl,
+            "title": level_title(lvl),
+            "emoji": avatar_emoji(u.username),
+            "url": url_for("profile", username=u.username),
+        })
+    return jsonify({"results": results})

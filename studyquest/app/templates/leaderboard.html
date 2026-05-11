@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard · Study Quest{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Leaderboard</h1>
+    <p class="page-subtitle">Most devoted scholars</p>
+  </div>
+</div>
+
+<!-- ── #41 AJAX user search ─────────────────────────────── -->
+<div class="card" style="margin-bottom:1rem;padding:.875rem 1rem">
+  <div class="form-group" style="margin:0">
+    <label class="form-label" for="user-search">🔍 Find a scholar</label>
+    <input type="text" id="user-search" class="form-input"
+           placeholder="Type a username…" autocomplete="off"
+           data-search-url="{{ url_for('search_users') }}">
+    <div id="search-results" style="margin-top:.6rem;display:none"></div>
+  </div>
+</div>
+
+{% if me %}
+<div class="your-rank-callout">
+  <span style="font-size:1.125rem">{{ me.emoji }}</span>
+  <div>
+    <span class="rank-label">Your rank: </span>
+    <span class="rank-value">#{{ me.rank }}</span>
+    <span class="rank-label"> of {{ total }} scholar{% if total != 1 %}s{% endif %}</span>
+  </div>
+  <span class="badge badge-level" style="margin-left:auto">Lv {{ me.level }}</span>
+</div>
+{% endif %}
+
+{% if rows %}
+<div class="leaderboard-list">
+  {% for r in rows %}
+    <div class="leaderboard-row{% if r.rank <= 3 %} rank-{{ r.rank }}{% endif %}{% if r.is_current %} current-user{% endif %}">
+      {% if r.rank == 1 %}<span class="rank-medal">🥇</span>
+      {% elif r.rank == 2 %}<span class="rank-medal">🥈</span>
+      {% elif r.rank == 3 %}<span class="rank-medal">🥉</span>
+      {% else %}<span class="rank-number">{{ r.rank }}</span>
+      {% endif %}
+
+      <div class="leaderboard-avatar">{{ r.emoji }}</div>
+
+      <div class="leaderboard-user-info">
+        <div class="leaderboard-username">
+          <a href="{{ url_for('profile', username=r.user.username) }}" style="color:inherit;text-decoration:none">
+            {{ r.user.username }}{% if r.is_current %} <span style="font-size:.63rem;color:var(--honey);font-weight:700">(you)</span>{% endif %}
+          </a>
+        </div>
+        <div class="leaderboard-user-meta">{{ r.title }} · Level {{ r.level }}</div>
+      </div>
+
+      <span class="badge badge-level" style="margin-right:.375rem">Lv {{ r.level }}</span>
+      <div class="leaderboard-xp">{{ r.xp }}</div>
+    </div>
+  {% endfor %}
+</div>
+
+{% if next_user and me %}
+  <p class="xp-to-next">✦ &nbsp;{{ next_user.xp - me.xp + 1 }} more XP to overtake {{ next_user.user.username }} — keep questing! &nbsp;✦</p>
+{% elif me and me.rank == 1 and total > 1 %}
+  <p class="xp-to-next">✦ &nbsp;You're at the top of the grove — keep blooming! &nbsp;✦</p>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+  <span class="empty-state-icon">🌸</span>
+  <div class="empty-state-title">No scholars yet</div>
+  <p class="empty-state-text">Be the first to plant a quest and claim the top of the grove.</p>
+</div>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/leaderboard.js') }}"></script>
+{% endblock %}
