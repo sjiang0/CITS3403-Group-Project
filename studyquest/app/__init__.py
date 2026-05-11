@@ -7,10 +7,11 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_login import LoginManager
 
-app = Flask(__name__)
-app.config.from_object(Config)
-
-db = SQLAlchemy(app)
+db = SQLAlchemy()
+migrate = Migrate()
+csrf = CSRFProtect()
+limiter = Limiter(key_func=get_remote_address)
+login_manager = LoginManager()
 
 def create_app(config_class):
     app = Flask(__name__)
@@ -18,17 +19,13 @@ def create_app(config_class):
 
     db.init_app(app)
 
-    #TODO: initialise routes (blueprints)
+    login_manager.login_view = "login"
+    csrf.init_app(app)
+    limiter.init_app(app)
+    login_manager.init_app(app)
+
+    login_manager.login_view = "login"
+
+    #TODO: initialise routes
 
     return app
-migrate = Migrate(app,db)
-
-csrf = CSRFProtect(app)
-
-limiter = Limiter(key_func=get_remote_address, app=app)
-
-login_manager = LoginManager(app)
-login_manager.login_view = "login"
-
-
-from . import models,routes
