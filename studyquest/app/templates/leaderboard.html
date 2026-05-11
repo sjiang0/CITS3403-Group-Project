@@ -15,7 +15,7 @@
     <label class="form-label" for="user-search">🔍 Find a scholar</label>
     <input type="text" id="user-search" class="form-input"
            placeholder="Type a username…" autocomplete="off"
-           data-search-url="{{ url_for('search_users') }}">
+           data-search-url="{{ url_for('main.search_users') }}">
     <div id="search-results" style="margin-top:.6rem;display:none"></div>
   </div>
 </div>
@@ -46,7 +46,7 @@
 
       <div class="leaderboard-user-info">
         <div class="leaderboard-username">
-          <a href="{{ url_for('profile', username=r.user.username) }}" style="color:inherit;text-decoration:none">
+          <a href="{{ url_for('main.profile', username=r.user.username) }}" style="color:inherit;text-decoration:none">
             {{ r.user.username }}{% if r.is_current %} <span style="font-size:.63rem;color:var(--honey);font-weight:700">(you)</span>{% endif %}
           </a>
         </div>

@@ -12,19 +12,16 @@ migrate = Migrate()
 csrf = CSRFProtect()
 limiter = Limiter(key_func=get_remote_address)
 login_manager = LoginManager()
+login_manager.login_view = "main.login"
 
 def create_app(config_class=DeploymentConfig):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
     db.init_app(app)
-
-    login_manager.login_view = "login"
     csrf.init_app(app)
     limiter.init_app(app)
     login_manager.init_app(app)
-
-    login_manager.login_view = "login"
 
     from app.blueprints import main
     app.register_blueprint(main)

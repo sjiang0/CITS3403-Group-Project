@@ -1,6 +1,6 @@
+from flask import render_template, jsonify, request, redirect, url_for, flash
 from app import db, limiter
 from app.blueprints import main
-from flask import render_template, jsonify, request, redirect, url_for, flash
 from app.models import User, Quest
 from datetime import datetime, date
 from app.security import is_strong_password
@@ -370,7 +370,7 @@ def login():
         flash("Logged in successfully!", "flash-success")
         return redirect(url_for("main.dashboard"))
 
-    return render_template("main.login.html")
+    return render_template("login.html")
 
 @main.route("/logout", methods=["POST"])
 def logout():
@@ -436,7 +436,7 @@ def leaderboard():
             "level": lvl,
             "title": level_title(lvl),
             "emoji": avatar_emoji(u.username),
-            "is_current": u.id == current_user.user.id,
+            "is_current": u.id == current_user.id,
         })
 
     me = next((r for r in rows if r["is_current"]), None)
@@ -456,7 +456,7 @@ def leaderboard():
 @login_required
 def profile(username=None):
     if username is None:
-        user = current_user.user
+        user = current_user
     else:
         user = User.query.filter_by(username=username.lower()).first_or_404()
 
@@ -489,7 +489,7 @@ def profile(username=None):
         completed_count=completed_count,
         recent_completed=recent_completed,
         rank=rank,
-        is_self=(user.id == current_user.user.id),
+        is_self=(user.id == current_user.id),
     )
 
 

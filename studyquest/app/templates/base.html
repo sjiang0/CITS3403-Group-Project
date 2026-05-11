@@ -24,10 +24,10 @@
     <!-- NAV -->
     <div>
       <nav class="space-y-2">
-        <a href="{{ url_for('dashboard') }}" class="block">Dashboard</a>
-        <a href="{{ url_for('my_quests') }}" class="block">My Quests</a>
-        <a href="{{ url_for('leaderboard') }}" class="block">Leaderboard</a>
-        <a href="{{ url_for('profile') }}" class="block">Profile</a>
+        <a href="{{ url_for('main.dashboard') }}" class="block">Dashboard</a>
+        <a href="{{ url_for('main.my_quests') }}" class="block">My Quests</a>
+        <a href="{{ url_for('main.leaderboard') }}" class="block">Leaderboard</a>
+        <a href="{{ url_for('main.profile') }}" class="block">Profile</a>
       </nav>
     </div>
 
@@ -39,7 +39,7 @@
     </div>
 
     <div>
-       <form action="{{ url_for('logout') }}" method="POST">
+       <form action="{{ url_for('main.logout') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="border border-black px-3 py-1">Logout</button>
        </form>
@@ -54,7 +54,7 @@
     {% if current_user.is_authenticated %}
     <!-- FLOATING BUTTON -->
     <div class="fixed top-5 right-5">
-      <a href="{{ url_for('create_quest') }}"
+      <a href="{{ url_for('main.create_quest') }}"
          class="border border-black px-3 py-1 inline-block">
         + NEW QUEST
       </a>
