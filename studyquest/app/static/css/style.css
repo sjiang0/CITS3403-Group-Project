@@ -529,7 +529,8 @@ h4 { font-size: var(--text-lg);  font-weight: 600; }
 .xp-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
 .xp-card-title { font-family: var(--font-display); font-size: 1rem; font-weight: 600; color: var(--bark-mid); }
 .xp-big-bar { height: 8px; background: var(--parchment-dark); border-radius: var(--radius-pill); overflow: hidden; margin: .375rem 0 .25rem; }
-.xp-big-fill { height: 100%; border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--honey), var(--honey-light)); transition: width .9s cubic-bezier(.4,0,.2,1); }
+.xp-big-bar-spaced { margin-top: .5rem; }
+.xp-big-fill { width: var(--xp-progress, 0%); height: 100%; border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--honey), var(--honey-light)); transition: width .9s cubic-bezier(.4,0,.2,1); }
 .xp-bar-labels { display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--bark-light); }
 
 .progress-bar { height: 6px; background: var(--parchment-mid); border-radius: var(--radius-pill); overflow: hidden; }

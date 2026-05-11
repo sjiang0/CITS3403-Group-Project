@@ -46,8 +46,8 @@
       <strong style="color:var(--bark-mid)">{{ xp_into }}</strong> / 100 XP this level —
       <strong style="color:var(--bark-mid)">{{ xp_to_next }}</strong> XP to next level.
     </div>
-    <div class="xp-big-bar" style="margin-top:.5rem">
-      <div class="xp-big-fill" style="width:{{ xp_into }}%"></div>
+    <div class="xp-big-bar xp-big-bar-spaced">
+      <div class="xp-big-fill" style="--xp-progress: {{ xp_into }}%"></div>
     </div>
   </div>
 </div>
