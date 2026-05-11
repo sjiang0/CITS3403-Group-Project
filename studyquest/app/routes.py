@@ -75,6 +75,7 @@ def dashboard():
 
     return render_template(
         "dashboard.html",
+        today = today,
         quests=active_quests,
         xp=xp,
         level=level,
