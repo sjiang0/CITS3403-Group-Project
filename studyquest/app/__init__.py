@@ -11,6 +11,16 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 db = SQLAlchemy(app)
+
+def create_app(config_class):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+
+    db.init_app(app)
+
+    #TODO: initialise routes (blueprints)
+
+    return app
 migrate = Migrate(app,db)
 
 csrf = CSRFProtect(app)
