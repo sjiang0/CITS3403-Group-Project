@@ -232,13 +232,13 @@
 
         <div class="quest-actions">
 
-          <form method="POST" action="{{ url_for('uncomplete_quest', quest_id=quest.id) }}" class="uncomplete-form">
+          <form method="POST" action="{{ url_for('main.uncomplete_quest', quest_id=quest.id) }}" class="uncomplete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-gold btn-sm">Uncomplete</button>
           </form>
 
           <form method="POST"
-                action="{{ url_for('delete_quest', quest_id=quest.id) }}"
+                action="{{ url_for('main.delete_quest', quest_id=quest.id) }}"
                 class="delete-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn-danger btn-sm">
