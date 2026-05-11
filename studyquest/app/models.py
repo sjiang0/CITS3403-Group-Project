@@ -1,6 +1,8 @@
-from . import db
+from . import db, login_manager
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date
+from flask_login import UserMixin
+
 
 
 class Quest(db.Model):
@@ -39,7 +41,7 @@ class Quest(db.Model):
         self.user.last_active = date.today()
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -56,3 +58,7 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
