@@ -1,4 +1,5 @@
-from app import app, db, limiter
+from app import db, limiter
+from app.blueprints import main
 from flask import render_template, jsonify, request, redirect, url_for, flash
 from app.models import User, Quest
 from datetime import datetime, date
@@ -7,14 +8,14 @@ from flask_limiter.errors import RateLimitExceeded
 from flask_login import login_user, logout_user, login_required, current_user
 
 #flash rate limit error instead of causing 429 too many requests -jacob
-@app.errorhandler(RateLimitExceeded)
+@main.errorhandler(RateLimitExceeded)
 def handle_rate_limit(e):
     flash(str(e.description), "flash-error")
-    return redirect(request.referrer or url_for("login"))
+    return redirect(request.referrer or url_for("main.login"))
 
 
-@app.route("/") 
-@app.route("/dashboard")
+@main.route("/") 
+@main.route("/dashboard")
 @login_required
 def dashboard():
     # extract 3 active quests. 
@@ -87,7 +88,7 @@ def dashboard():
         completion_rate=completion_rate
     )
 
-@app.route("/my-quests")
+@main.route("/my-quests")
 @login_required
 def my_quests():
     today = date.today()
@@ -141,7 +142,7 @@ def my_quests():
         overdue_count=counts["overdue"]
     )
 
-@app.route('/create-quest', methods=['GET', 'POST'])
+@main.route('/create-quest', methods=['GET', 'POST'])
 @login_required
 def create_quest():
     print(request.method)
@@ -190,7 +191,7 @@ def create_quest():
         if errors:
             for e in errors:
                 flash(e, "flash-error")
-            return redirect(url_for("create_quest"))
+            return redirect(url_for("main.create_quest"))
         
         new_quest = Quest(
             title=title,
@@ -207,11 +208,11 @@ def create_quest():
 
         flash('Quest created successfully!', 'flash-success')
 
-        return redirect(url_for('my_quests')) #TODO: decide where to redirect
+        return redirect(url_for('main.my_quests')) #TODO: decide where to redirect
     return render_template("create_quest.html")
 
 
-@app.route("/quest/<int:quest_id>/delete", methods=["POST"])
+@main.route("/quest/<int:quest_id>/delete", methods=["POST"])
 @login_required
 def delete_quest(quest_id):
     quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
@@ -225,10 +226,10 @@ def delete_quest(quest_id):
 
     # fallback
     flash("Quest deleted.", "flash-success")
-    return redirect(url_for("my_quests"))
+    return redirect(url_for("main.my_quests"))
 
 
-@app.route("/quest/<int:quest_id>/complete", methods=["POST"])
+@main.route("/quest/<int:quest_id>/complete", methods=["POST"])
 @login_required
 def complete_quest(quest_id):
     quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
@@ -261,9 +262,9 @@ def complete_quest(quest_id):
     
     # fallback
     flash("Quest completed!", "flash-success")
-    return redirect(url_for("my_quests"))
+    return redirect(url_for("main.my_quests"))
 
-@app.route("/quest/<int:quest_id>/uncomplete", methods=["POST"])
+@main.route("/quest/<int:quest_id>/uncomplete", methods=["POST"])
 @login_required
 def uncomplete_quest(quest_id):
     quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
@@ -283,9 +284,9 @@ def uncomplete_quest(quest_id):
 
     # fallback 
     flash("Quest moved back to active.", "flash-success")
-    return redirect(url_for("my_quests"))
+    return redirect(url_for("main.my_quests"))
 
-@app.route("/quest/<int:quest_id>/edit", methods=["GET", "POST"])
+@main.route("/quest/<int:quest_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_quest(quest_id):
     quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
@@ -330,7 +331,7 @@ def edit_quest(quest_id):
         if errors:
             for e in errors:
                 flash(e, "flash-error")
-            return redirect(url_for("edit_quest", quest_id=quest.id))
+            return redirect(url_for("main.edit_quest", quest_id=quest.id))
 
         # update fields directly (no need for model method)
         quest.title = title
@@ -342,12 +343,12 @@ def edit_quest(quest_id):
         db.session.commit()
 
         flash("Quest updated.", "flash-success")
-        return redirect(url_for("my_quests"))
+        return redirect(url_for("main.my_quests"))
 
     return render_template("edit_quest.html", quest=quest)
 
 
-@app.route("/login", methods=["GET", "POST"])
+@main.route("/login", methods=["GET", "POST"])
 @limiter.limit("5 per minute", methods=["POST"], error_message="Too many login attempts, please try again in a minute.")
 def login():
     if request.method == "POST":
@@ -358,26 +359,26 @@ def login():
 
         if not user:
             flash("Username does not exist.", "flash-error")
-            return redirect(url_for("login"))
+            return redirect(url_for("main.login"))
 
         if not user.check_password(password):
             flash("Incorrect password.", "flash-error")
-            return redirect(url_for("login"))
+            return redirect(url_for("main.login"))
 
         login_user(user)
 
         flash("Logged in successfully!", "flash-success")
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("main.dashboard"))
 
-    return render_template("login.html")
+    return render_template("main.login.html")
 
-@app.route("/logout", methods=["POST"])
+@main.route("/logout", methods=["POST"])
 def logout():
     logout_user()
     flash("You have been logged out.", "flash-info")
-    return redirect(url_for("login"))
+    return redirect(url_for("main.login"))
 
-@app.route("/register", methods=["GET", "POST"])
+@main.route("/register", methods=["GET", "POST"])
 @limiter.limit("20 per hour", methods=["POST"], error_message="Too many registrations, please try again in an hour.")
 def register():
     if request.method == "POST":
@@ -390,15 +391,15 @@ def register():
 
         if password != confirm_password:
             flash("Passwords do not match.", "flash-error")
-            return redirect(url_for("register"))
+            return redirect(url_for("main.register"))
 
         if not is_strong_password(password):
             flash("Password must be at least 8 characters and include letters, numbers, and special characters.", "flash-error")
-            return redirect(url_for("register"))
+            return redirect(url_for("main.register"))
 
         if User.query.filter_by(username=username).first():
             flash("Username already exists.", "flash-error")
-            return redirect(url_for("register"))
+            return redirect(url_for("main.register"))
 
         new_user = User(username=username)
         new_user.set_password(password)
@@ -407,7 +408,7 @@ def register():
         db.session.commit()
 
         flash("Account created! Please log in.", "flash-success")
-        return redirect(url_for("login"))
+        return redirect(url_for("main.login"))
 
     return render_template("register.html")
 
@@ -420,7 +421,7 @@ from app.xp_helpers import (
 )
 
 
-@app.route("/leaderboard")
+@main.route("/leaderboard")
 @login_required
 def leaderboard():
     users = User.query.order_by(User.xp.desc(), User.id.asc()).all()
@@ -450,8 +451,8 @@ def leaderboard():
     )
 
 
-@app.route("/profile")
-@app.route("/profile/<username>")
+@main.route("/profile")
+@main.route("/profile/<username>")
 @login_required
 def profile(username=None):
     if username is None:
@@ -492,7 +493,7 @@ def profile(username=None):
     )
 
 
-@app.route("/search_users")
+@main.route("/search_users")
 @login_required
 def search_users():
     q = (request.args.get("q") or "").strip().lower()
@@ -516,6 +517,6 @@ def search_users():
             "level": lvl,
             "title": level_title(lvl),
             "emoji": avatar_emoji(u.username),
-            "url": url_for("profile", username=u.username),
+            "url": url_for("main.profile", username=u.username),
         })
     return jsonify({"results": results})
