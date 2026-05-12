@@ -385,7 +385,7 @@ def register():
         username = request.form["username"].lower().strip()
         if len(username) < 3: #added username must be atleast 3 digits check
             flash("Username must be at least 3 characters.", "flash-error")
-            return redirect(url_for("register"))
+            return redirect(url_for("main.register"))
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
 
