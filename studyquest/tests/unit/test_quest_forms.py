@@ -30,7 +30,7 @@ class QuestFormsTests(unittest.TestCase):
             url = url_for("main.create_quest")
         with self.client:
             response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, "Create Quest did not return 200 OK")
         self.assertIn(b"Create Quest", response.data)
 
     def test_create_quest_success(self):
@@ -56,11 +56,11 @@ class QuestFormsTests(unittest.TestCase):
         self.assertIn(b"Quest created successfully!", response.data)
 
         quest = Quest.query.filter_by(title="New Quest").first()
-        self.assertIsNotNone(quest)
-        self.assertEqual(quest.user_id, self.user.id)
-        self.assertEqual(quest.difficulty, "medium")
-        self.assertEqual(quest.quest_type, "study")
-        self.assertEqual(quest.due_date.isoformat(), due)
+        self.assertIsNotNone(quest, "Quest was not created in the database.")
+        self.assertEqual(quest.user_id, self.user.id, "Quest user_id does not match the logged-in user.")
+        self.assertEqual(quest.difficulty, "medium", "Quest difficulty was not saved correctly.")
+        self.assertEqual(quest.quest_type, "study", "Quest type was not saved correctly.")
+        self.assertEqual(quest.due_date.isoformat(), due, "Quest due date was not saved correctly.")
 
     def test_create_quest_validation_errors(self):
         """Submitting invalid form shows errors"""
@@ -78,12 +78,12 @@ class QuestFormsTests(unittest.TestCase):
                 },
                 follow_redirects=True
             )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Title is required.", response.data)
-        self.assertIn(b"Description must be at least 10 characters.", response.data)
-        self.assertIn(b"Invalid quest type selected.", response.data)
-        self.assertIn(b"Invalid difficulty selected.", response.data)
-        self.assertIn(b"Due date cannot be in the past.", response.data)
+        self.assertEqual(response.status_code, 200, "Invalid form submission did not return 200 OK.")
+        self.assertIn(b"Title is required.", response.data, "Missing title validation error was not displayed.")
+        self.assertIn(b"Description must be at least 10 characters.", response.data, "Description length validation error was not displayed.")
+        self.assertIn(b"Invalid quest type selected.", response.data, "Invalid quest type validation error was not displayed.")
+        self.assertIn(b"Invalid difficulty selected.", response.data, "Invalid difficulty validation error was not displayed.")
+        self.assertIn(b"Due date cannot be in the past.", response.data, "Past due date validation error was not displayed.")
 
     def test_edit_quest_form_renders(self):
         """Edit quest page loads successfully with pre-filled data"""
@@ -101,10 +101,10 @@ class QuestFormsTests(unittest.TestCase):
             url = url_for("main.edit_quest", quest_id=quest.id)
         with self.client:
             response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Edit Quest", response.data)
-        self.assertIn(b"Edit Me", response.data)
-        self.assertIn(b"Original description", response.data)
+        self.assertEqual(response.status_code, 200, "Edit Quest page did not return status code 200 OK.")
+        self.assertIn(b"Edit Quest", response.data, "Edit Quest page heading was not found in the response.")
+        self.assertIn(b"Edit Me", response.data, "Quest title was not pre-filled in the edit form.")
+        self.assertIn(b"Original description", response.data, "Quest description was not pre-filled in the edit form.")
 
     def test_edit_quest_success(self):
         """Editing a quest with valid data updates it"""
@@ -135,15 +135,24 @@ class QuestFormsTests(unittest.TestCase):
                 follow_redirects=True
             )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Quest updated.", response.data)
+        self.assertEqual(response.status_code, 200, "Edit quest submission did not return status code 200 OK.")
+        self.assertIn(b"Quest updated.", response.data, "Quest update success message was not displayed.")
 
         quest = Quest.query.get(quest.id)
-        self.assertEqual(quest.title, "Updated Title")
-        self.assertEqual(quest.description, "Updated description with enough length")
-        self.assertEqual(quest.quest_type, "assignment")
-        self.assertEqual(quest.difficulty, "hard")
-        self.assertEqual(quest.due_date.isoformat(), new_due)
+
+        self.assertEqual(quest.title, "Updated Title", "Quest title was not updated correctly.")
+        self.assertEqual(
+            quest.description,
+            "Updated description with enough length",
+            "Quest description was not updated correctly."
+        )
+        self.assertEqual(quest.quest_type, "assignment", "Quest type was not updated correctly.")
+        self.assertEqual(quest.difficulty, "hard", "Quest difficulty was not updated correctly.")
+        self.assertEqual(
+            quest.due_date.isoformat(),
+            new_due,
+            "Quest due date was not updated correctly."
+        )
 
     def test_edit_quest_validation_errors(self):
         """Submitting invalid edit shows errors"""
@@ -172,13 +181,12 @@ class QuestFormsTests(unittest.TestCase):
                 follow_redirects=True
             )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Title is required.", response.data)
-        self.assertIn(b"Description must be at least 10 characters.", response.data)
-        self.assertIn(b"Invalid quest type selected.", response.data)
-        self.assertIn(b"Invalid difficulty selected.", response.data)
-        self.assertIn(b"Due date cannot be in the past.", response.data)
-
+        self.assertEqual(response.status_code, 200, "Invalid edit quest submission did not return status code 200 OK.")
+        self.assertIn(b"Title is required.", response.data, "Missing title validation error was not displayed.")
+        self.assertIn(b"Description must be at least 10 characters.",response.data,"Description length validation error was not displayed.")
+        self.assertIn(b"Invalid quest type selected.",response.data,"Invalid quest type validation error was not displayed.")
+        self.assertIn(b"Invalid difficulty selected.",response.data,"Invalid difficulty validation error was not displayed.")
+        self.assertIn(b"Due date cannot be in the past.",response.data,"Past due date validation error was not displayed.")
 
 if __name__ == "__main__":
     unittest.main()
