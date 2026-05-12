@@ -34,24 +34,43 @@ class DashboardUnitTests(unittest.TestCase):
         )
 
     def test_dashboard_quests_rendered(self):
-        """Dashboard should display active quests in correct order"""
+        """Dashboard should display top 3 active quests in correct priority order"""
         response = self.client.get("/dashboard")
         data = response.data.decode()
 
-        # Check all quest titles are rendered
-        for quest in self.quests:
+        today = date.today()
+
+        # Replicates the route logic
+        overdue_quests = [q for q in self.quests if q.status == "In Progress" and q.due_date and q.due_date < today]
+        overdue_quests.sort(key=lambda q: q.due_date)
+
+        upcoming_quests = [q for q in self.quests if q.status == "In Progress" and q.due_date and q.due_date >= today]
+        upcoming_quests.sort(key=lambda q: q.due_date)
+
+        no_due_quests = [q for q in self.quests if q.status == "In Progress" and not q.due_date]
+
+        active_quests = (overdue_quests + upcoming_quests + no_due_quests)[:3]
+
+        # Check that only these 3 quests are rendered
+        for quest in active_quests:
             self.assertIn(
                 quest.title, data,
                 f"Quest title '{quest.title}' not found in dashboard HTML"
             )
 
-        # Check order: overdue first, then upcoming, then no due date
-        overdue_index = data.find("Overdue Quest")
-        upcoming_index = data.find("Upcoming Quest")
-        no_due_index = data.find("No Due Date Quest")
+        # Make sure quests outside the top 3 are not rendered
+        other_quests = set(self.quests) - set(active_quests)
+        for quest in other_quests:
+            self.assertNotIn(
+                quest.title, data,
+                f"Quest title '{quest.title}' should not appear in dashboard HTML (not in top 3 active)"
+            )
+
+        # Check priority order
+        indices = [data.find(q.title) for q in active_quests]
         self.assertTrue(
-            overdue_index < upcoming_index < no_due_index,
-            "Quests are not displayed in correct priority order: overdue → upcoming → no due date"
+            indices == sorted(indices),
+            "Active quests are not displayed in correct priority order: overdue → upcoming → no due date"
         )
 
     def test_dashboard_xp_and_level(self):
