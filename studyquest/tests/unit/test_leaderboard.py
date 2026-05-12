@@ -37,29 +37,53 @@ class LeaderboardTests(unittest.TestCase):
 
     def test_anonymous_user_is_redirected_to_login(self):
         response = self.client.get("/leaderboard", follow_redirects=False)
-        self.assertEqual(response.status_code, 302)
-        self.assertIn("/login", response.headers["Location"])
+        self.assertEqual(
+            response.status_code, 302,
+            "Anonymous user hitting /leaderboard should be redirected (302), not served the page"
+        )
+        self.assertIn(
+            "/login", response.headers["Location"],
+            "Redirect target for unauthenticated /leaderboard should point at /login"
+        )
 
     def test_ranking_is_xp_descending(self):
         self._login(self.me)
         response = self.client.get("/leaderboard")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.status_code, 200,
+            "Logged-in user should get a 200 OK from /leaderboard"
+        )
         body = response.get_data(as_text=True)
         # Each row links to /profile/<username>; document order = row order
         order = re.findall(r"/profile/([a-z0-9]+)", body)
-        self.assertEqual(order[:3], ["alice", "me", "bob"])
+        self.assertEqual(
+            order[:3], ["alice", "me", "bob"],
+            "Leaderboard rows should be ordered by xp descending (alice 200, me 120, bob 80)"
+        )
 
     def test_current_user_row_has_highlight_class(self):
         self._login(self.me)
         body = self.client.get("/leaderboard").get_data(as_text=True)
-        self.assertIn("current-user", body)
+        self.assertIn(
+            "current-user", body,
+            "The logged-in user's row should carry the 'current-user' CSS class for highlight"
+        )
 
     def test_top_three_get_medal_emojis(self):
         self._login(self.me)
         body = self.client.get("/leaderboard").get_data(as_text=True)
-        self.assertIn("🥇", body)
-        self.assertIn("🥈", body)
-        self.assertIn("🥉", body)
+        self.assertIn(
+            "🥇", body,
+            "Rank 1 row should render the gold medal emoji"
+        )
+        self.assertIn(
+            "🥈", body,
+            "Rank 2 row should render the silver medal emoji"
+        )
+        self.assertIn(
+            "🥉", body,
+            "Rank 3 row should render the bronze medal emoji"
+        )
 
 
 if __name__ == "__main__":
