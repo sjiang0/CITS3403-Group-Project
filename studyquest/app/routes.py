@@ -15,6 +15,11 @@ def handle_rate_limit(e):
 
 
 @main.route("/") 
+def landing():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+    return render_template("landing.html")
+
 @main.route("/dashboard")
 @login_required
 def dashboard():
@@ -351,6 +356,9 @@ def edit_quest(quest_id):
 @main.route("/login", methods=["GET", "POST"])
 @limiter.limit("5 per minute", methods=["POST"], error_message="Too many login attempts, please try again in a minute.")
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+    
     if request.method == "POST":
         username = request.form["username"].lower().strip()
         password = request.form["password"]
@@ -381,6 +389,9 @@ def logout():
 @main.route("/register", methods=["GET", "POST"])
 @limiter.limit("20 per hour", methods=["POST"], error_message="Too many registrations, please try again in an hour.")
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+    
     if request.method == "POST":
         username = request.form["username"].lower().strip()
         if len(username) < 3: #added username must be atleast 3 digits check
