@@ -39,13 +39,22 @@ class SearchUsersTests(unittest.TestCase):
 
     def test_anonymous_user_is_redirected_to_login(self):
         response = self.client.get("/search_users?q=al", follow_redirects=False)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.status_code, 302,
+            "Anonymous user hitting /search_users should be redirected, not get JSON results"
+        )
 
     def test_empty_query_returns_empty_results(self):
         self._login(self.me)
         response = self.client.get("/search_users?q=")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json(), {"results": []})
+        self.assertEqual(
+            response.status_code, 200,
+            "Logged-in user with empty query should get 200, not redirect or error"
+        )
+        self.assertEqual(
+            response.get_json(), {"results": []},
+            "Empty query should return an empty results list, not all users"
+        )
 
     def test_substring_match_returns_matching_users_only(self):
         self._add_user("alice", xp=100)
@@ -55,23 +64,41 @@ class SearchUsersTests(unittest.TestCase):
 
         data = self.client.get("/search_users?q=al").get_json()
         names = [r["username"] for r in data["results"]]
-        self.assertIn("alice", names)
-        self.assertIn("alfred", names)
-        self.assertNotIn("bob", names)
+        self.assertIn(
+            "alice", names,
+            "'alice' should match the substring 'al'"
+        )
+        self.assertIn(
+            "alfred", names,
+            "'alfred' should match the substring 'al'"
+        )
+        self.assertNotIn(
+            "bob", names,
+            "'bob' does not contain 'al' and should not appear in results"
+        )
 
     def test_results_carry_a_profile_url(self):
         self._add_user("findable")
         self._login(self.me)
         data = self.client.get("/search_users?q=find").get_json()
-        self.assertEqual(len(data["results"]), 1)
-        self.assertEqual(data["results"][0]["url"], "/profile/findable")
+        self.assertEqual(
+            len(data["results"]), 1,
+            "Substring 'find' should match exactly one user, 'findable'"
+        )
+        self.assertEqual(
+            data["results"][0]["url"], "/profile/findable",
+            "Each search result should include the profile URL for that user"
+        )
 
     def test_results_capped_at_ten_per_query(self):
         for i in range(15):
             self._add_user(f"user{i:02d}", xp=i)
         self._login(self.me)
         data = self.client.get("/search_users?q=user").get_json()
-        self.assertEqual(len(data["results"]), 10)
+        self.assertEqual(
+            len(data["results"]), 10,
+            "search_users should cap results at 10 per query to avoid heavy payloads"
+        )
 
 
 if __name__ == "__main__":
