@@ -384,7 +384,7 @@ def login():
 def logout():
     logout_user()
     flash("You have been logged out.", "flash-info")
-    return redirect(url_for("main.login"))
+    return redirect(url_for("main.landing"))
 
 @main.route("/register", methods=["GET", "POST"])
 @limiter.limit("20 per hour", methods=["POST"], error_message="Too many registrations, please try again in an hour.")
