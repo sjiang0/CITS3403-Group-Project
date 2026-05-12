@@ -31,7 +31,7 @@ class QuestFormsTests(unittest.TestCase):
         with self.client:
             response = self.client.get(url)
         self.assertEqual(response.status_code, 200, "Create Quest did not return 200 OK")
-        self.assertIn(b"Create Quest", response.data)
+        self.assertIn(b"Create Quest", response.data, "Create Quest page heading was not found in the response.")
 
     def test_create_quest_success(self):
         """Submitting valid form creates a quest"""
@@ -51,9 +51,8 @@ class QuestFormsTests(unittest.TestCase):
                 },
                 follow_redirects=True
             )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Quest created successfully!", response.data)
+        self.assertEqual(response.status_code, 200, "Valid quest submission did not return status code 200 OK.")
+        self.assertIn(b"Quest created successfully!",response.data,"Quest creation success message was not displayed.")
 
         quest = Quest.query.filter_by(title="New Quest").first()
         self.assertIsNotNone(quest, "Quest was not created in the database.")
