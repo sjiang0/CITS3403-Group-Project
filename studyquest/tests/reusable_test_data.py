@@ -4,7 +4,7 @@ from app.models import User, Quest
 
 def create_test_user(
     username="testuser",
-    password="password",
+    password="p1asSword!",
     xp=150,
     streak=3,
     last_active=None

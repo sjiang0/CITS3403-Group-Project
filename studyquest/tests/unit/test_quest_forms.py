@@ -4,7 +4,7 @@ from flask import url_for
 from app import create_app, db
 from app.models import Quest
 from app.config import TestConfig
-from .reusable_test_data import create_test_user
+from tests.reusable_test_data import create_test_user
 
 
 class QuestFormsTests(unittest.TestCase):

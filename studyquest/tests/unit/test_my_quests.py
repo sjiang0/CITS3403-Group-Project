@@ -1,7 +1,7 @@
 import unittest
 from app import create_app, db
 from app.config import TestConfig
-from .reusable_test_data import *
+from tests.reusable_test_data import *
 from flask import url_for
 from datetime import date
 
