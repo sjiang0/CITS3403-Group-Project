@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoAlertPresentException
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 
 from app import create_app, db
 from app.config import TestConfig
@@ -33,13 +34,29 @@ class QuestSeleniumTests(unittest.TestCase):
         # Start Flask server in a daemon thread
         cls.server_thread = threading.Thread(
             target=cls.testApp.run,
-            kwargs={"use_reloader": False, "debug": False, "host": "127.0.0.1", "port": 5000},
-            daemon=True
+            kwargs={"use_reloader": False, "debug": False, "host": "127.0.0.1", "port": 5000, "threaded": False},
+            daemon=True,
         )
         cls.server_thread.start()
+        time.sleep(1)
 
-        # Start WebDriver
-        cls.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        # block pop-ups and alerts (messes up the tests)
+        chrome_options = Options()
+        chrome_options.add_argument("--disable-notifications")
+        chrome_options.add_argument("--disable-infobars")
+        chrome_options.add_argument("--disable-save-password-bubble")
+        chrome_options.add_argument("--no-first-run")
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_prefs = {
+            "credentials_enable_service": False,               
+            "profile.password_manager_enabled": False,        
+            "profile.default_content_setting_values.notifications": 2,
+            "safebrowsing.enabled": True,
+            "password_manager_enabled": False           
+        }
+        chrome_options.add_experimental_option("prefs", chrome_prefs)
+        cls.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),
+                                    options=chrome_options)
         cls.wait = WebDriverWait(cls.driver, 10)
         cls.driver.get(localHost)
 
@@ -54,12 +71,11 @@ class QuestSeleniumTests(unittest.TestCase):
         cls.app_context.pop()
 
     @classmethod
-    def _login(cls, driver, wait, username="testuser", password="password"):
+    def _login(cls, driver, wait, username="testuser", password="p1asSword!"):
         """Class method login for use in setUpClass."""
         driver.get(localHost)
         time.sleep(2)  # pause to see landing page
 
-        driver.delete_all_cookies()
         driver.get(localHost + "login")
 
         username_field = wait.until(
@@ -89,13 +105,6 @@ class QuestSeleniumTests(unittest.TestCase):
         dashboard_link = self.driver.find_element(By.LINK_TEXT, "My Quests")
         dashboard_link.click()
         time.sleep(2)  # pause to see My Quests page
-
-        # Handle unexpected alert (during testing, kept getting password found in breach alert)
-        try:
-            alert = self.driver.switch_to.alert
-            alert.dismiss()
-        except NoAlertPresentException:
-            pass
 
         # Find first active quest
         active_section = self.driver.find_element(By.ID, "active-section")
@@ -129,6 +138,5 @@ class QuestSeleniumTests(unittest.TestCase):
         )
 
         time.sleep(2)  # pause to see completed quests
-
 if __name__ == "__main__":
     unittest.main()
