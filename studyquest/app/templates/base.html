@@ -2,80 +2,176 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Study Quest{% endblock %}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_css %}{% endblock %}
 </head>
+<body>
 
-<body class="m-0 font-sans">
-
-<div class="flex min-h-screen">
-
-  <!-- SIDEBAR -->
-  {% if current_user.is_authenticated %}
-  <aside class="w-64 border-r border-black p-5 flex flex-col justify-evenly">
-
-    <!-- LOGO -->
-    <div>
-      <h2 class="text-xl font-bold">Study Quest</h2>
-    </div>
-
-    <!-- NAV -->
-    <div>
-      <nav class="space-y-2">
-        <a href="{{ url_for('main.dashboard') }}" class="block">Dashboard</a>
-        <a href="{{ url_for('main.my_quests') }}" class="block">My Quests</a>
-        <a href="{{ url_for('main.leaderboard') }}" class="block">Leaderboard</a>
-        <a href="{{ url_for('main.profile') }}" class="block">Profile</a>
-      </nav>
-    </div>
-
-    <!-- USER INFO -->
-    <div>
-      <p><strong>{{ current_user.username }}</strong></p>
-      <p>Level 3</p>
-      <p>120 / 200 XP</p>
-    </div>
-
-    <div>
-       <form action="{{ url_for('main.logout') }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="border border-black px-3 py-1">Logout</button>
-       </form>
-    </div>
-
-  </aside>
-  {% endif %}
-
-  <!-- MAIN CONTENT -->
-  <main class="flex-1 p-8 max-w-3xl mx-auto">
-
-    {% if current_user.is_authenticated %}
-    <!-- FLOATING BUTTON -->
-    <div class="fixed top-5 right-5">
-      <a href="{{ url_for('main.create_quest') }}"
-         class="border border-black px-3 py-1 inline-block">
-        + NEW QUEST
-      </a>
-    </div>
+<!-- Flash Messages Container -->
+<div class="flash-container" id="flash-container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="{{ category }}">
+          <span class="flash-icon">
+            {% if 'success' in category %}✓{% elif 'error' in category %}✕{% elif 'warning' in category %}⚠{% else %}ℹ{% endif %}
+          </span>
+          <span class="flash-message">{{ message }}</span>
+          <button type="button" class="flash-close" onclick="this.parentElement.remove()">×</button>
+        </div>
+      {% endfor %}
     {% endif %}
-
-    <!-- FLASH MESSAGES -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="{{ category }} border border-black p-2 mb-4">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
-    <!-- PAGE-SPECIFIC CONTENT GOES HERE -->
-    {% block content %}{% endblock %}
-
-  </main>
-
+  {% endwith %}
 </div>
 
+{% if current_user.is_authenticated %}
+<!-- ═══════════════════════════════════════════════════════
+     AUTHENTICATED LAYOUT: Sidebar + Main Content
+     ═══════════════════════════════════════════════════════ -->
+
+<!-- Mobile Overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar">
+  <!-- Brand -->
+  <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">
+    <div class="brand-icon">🌸</div>
+    <div>
+      <div class="brand-name">Study Quest</div>
+      <div class="brand-tagline">bloom & grow</div>
+    </div>
+  </a>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Quest</div>
+    <a href="{{ url_for('main.dashboard') }}" class="nav-item {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+      <span class="nav-icon">🏡</span>
+      <span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('main.my_quests') }}" class="nav-item {% if request.endpoint == 'main.my_quests' %}active{% endif %}">
+      <span class="nav-icon">📜</span>
+      <span>My Quests</span>
+    </a>
+    <a href="{{ url_for('main.create_quest') }}" class="nav-item {% if request.endpoint == 'main.create_quest' %}active{% endif %}">
+      <span class="nav-icon">✨</span>
+      <span>Plant Quest</span>
+    </a>
+
+    <div class="nav-section-label" style="margin-top:.75rem">Community</div>
+    <a href="{{ url_for('main.leaderboard') }}" class="nav-item {% if request.endpoint == 'main.leaderboard' %}active{% endif %}">
+      <span class="nav-icon">🏆</span>
+      <span>Leaderboard</span>
+    </a>
+    <a href="{{ url_for('main.profile') }}" class="nav-item {% if request.endpoint == 'main.profile' and not username %}active{% endif %}">
+      <span class="nav-icon">👤</span>
+      <span>My Journal</span>
+    </a>
+  </nav>
+
+  <!-- Divider -->
+  <div class="sidebar-divider"></div>
+
+  <!-- Character Card -->
+  {% set user_xp = current_user.xp or 0 %}
+  {% set user_level = (user_xp // 100) + 1 %}
+  {% set xp_into_level = user_xp % 100 %}
+  {% set xp_percent = (xp_into_level / 100) * 100 %}
+  
+  <a href="{{ url_for('main.profile') }}" class="char-card">
+    <div class="char-header">
+      <div class="char-avatar">
+        {% if current_user.username %}
+          {{ current_user.username[0].upper() }}
+        {% else %}
+          👤
+        {% endif %}
+      </div>
+      <div class="char-info">
+        <div class="char-name">{{ current_user.username }}</div>
+        <div class="char-class">
+          {% if user_level <= 2 %}Seedling Scholar
+          {% elif user_level <= 5 %}Budding Mage
+          {% elif user_level <= 10 %}Blooming Sage
+          {% else %}Eternal Grove Keeper{% endif %}
+        </div>
+      </div>
+      <span class="char-level-badge">Lv {{ user_level }}</span>
+    </div>
+    <div class="xp-bar-container">
+      <div class="xp-bar-fill" style="--xp: {{ xp_percent }}%"></div>
+    </div>
+    <div class="xp-label">{{ xp_into_level }} / 100 XP</div>
+  </a>
+
+  <!-- Logout -->
+  <div class="sidebar-bottom">
+    <form action="{{ url_for('main.logout') }}" method="POST" style="margin:0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="sidebar-logout" style="width:100%;background:none;border:none;text-align:left;cursor:pointer">
+        <span class="nav-icon">🚪</span>
+        <span>Sign Out</span>
+      </button>
+    </form>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main id="main-content">
+  <!-- Mobile Top Bar -->
+  <div class="mobile-topbar">
+    <button class="mobile-menu-btn" id="mobile-menu-btn" type="button">☰</button>
+    <span class="mobile-brand-text">Study Quest</span>
+    <div style="width:1.25rem"></div><!-- spacer -->
+  </div>
+
+  {% block content %}{% endblock %}
+</main>
+
+{% else %}
+<!-- ═══════════════════════════════════════════════════════
+     UNAUTHENTICATED LAYOUT: Full-width content only
+     ═══════════════════════════════════════════════════════ -->
+<main style="width:100%;min-height:100vh;position:relative;z-index:1">
+  {% block content %}{% endblock %}
+</main>
+
+{% endif %}
+
+<!-- Base Scripts -->
+<script>
+  // Mobile menu toggle
+  document.addEventListener('DOMContentLoaded', function() {
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    
+    if (menuBtn && sidebar && overlay) {
+      menuBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+      });
+      
+      overlay.addEventListener('click', function() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+      });
+    }
+
+    // Auto-dismiss flash messages after 5 seconds
+    const flashes = document.querySelectorAll('.flash-container > div');
+    flashes.forEach(flash => {
+      setTimeout(() => {
+        flash.classList.add('removing');
+        setTimeout(() => flash.remove(), 300);
+      }, 5000);
+    });
+  });
+</script>
+
+{% block extra_js %}{% endblock %}
 </body>
 </html>
