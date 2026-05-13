@@ -2,7 +2,7 @@ import unittest
 from datetime import date
 from app import create_app, db
 from app.config import TestConfig
-from .reusable_test_data import create_test_user, create_test_quests
+from tests.reusable_test_data import create_test_user, create_test_quests
 
 class DashboardUnitTests(unittest.TestCase):
     """Unit tests for the dashboard page"""
