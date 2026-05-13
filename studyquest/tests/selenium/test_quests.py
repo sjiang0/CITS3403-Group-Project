@@ -1,6 +1,5 @@
 import unittest
 import threading
-import time
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -11,50 +10,44 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from app import create_app, db
 from app.config import TestConfig
-
 from tests.reusable_test_data import *
 
-localHost = "http://localhost:5000/"
+localHost = "http://127.0.0.1:5000/"
 
 class QuestSeleniumTests(unittest.TestCase):
-    """Skeleton for Quest-related Selenium Webdriver tests"""
-    def setUp(self):
-        self.testApp = create_app(TestConfig)
-        self.app_context = self.testApp.app_context()
-        self.app_context.push()
-        
+    """Selenium tests shared Flask server."""
+
+    @classmethod
+    def setUpClass(cls):
+        # Create Flask app once
+        cls.testApp = create_app(TestConfig)
+        cls.app_context = cls.testApp.app_context()
+        cls.app_context.push()
+
         db.create_all()
-        self.user = create_test_user()
-        self.quests = create_test_quests(self.user)
+        cls.user = create_test_user()
+        cls.quests = create_test_quests(cls.user)
 
-        self.server_thread = threading.Thread(
-            target=self.testApp.run,
-            kwargs={
-                "use_reloader": False,
-                "debug": False,
-                "host": "127.0.0.1",
-                "port": 5000
-            }
+        # use Daemon thread so it's automatically killed after test runner finishes
+        cls.server_thread = threading.Thread(
+            target=cls.testApp.run,
+            kwargs={"use_reloader": False, "debug": False, "host": "127.0.0.1", "port": 5000},
+            daemon=True
         )
+        cls.server_thread.start()
 
-        self.server_thread.daemon = True
-        self.server_thread.start()
-
-        time.sleep(2) # give server time to boot up
-
-        self.driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install())
+        cls.driver = webdriver.Chrome(
+            service=Service(ChromeDriverManager().install()),
         )
-        self.driver.get(localHost)
+        cls.wait = WebDriverWait(cls.driver, 10)
+        cls.driver.get(localHost)
 
-        self.wait = WebDriverWait(self.driver, 10)
-
-    def tearDown(self):
-        self.driver.quit()
+    @classmethod
+    def tearDownClass(cls):
+        cls.driver.quit()
         db.session.remove()
         db.drop_all()
-        self.app_context.pop()
-
+        cls.app_context.pop()
 
     def test_login_redirects_to_dashboard(self):
         self.driver.get(localHost + "login")
@@ -70,6 +63,6 @@ class QuestSeleniumTests(unittest.TestCase):
             self.driver.current_url,
             "User was not redirected to /dashboard after login"
         )
-    
+
 if __name__ == "__main__":
     unittest.main()
