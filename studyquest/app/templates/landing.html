@@ -942,10 +942,13 @@ function triggerBloom(type) {
 
   overlay.classList.add('active');
 
-  // Close after 2.5 seconds (in real app this would redirect)
+  // Close after 1.3 seconds (in real app this would redirect)
   setTimeout(() => {
-    overlay.classList.remove('active');
-  }, 2800);
+  overlay.classList.remove('active');
+  window.location.href = type === 'login'
+    ? '/login'
+    : '/register';
+  }, 1300);
 }
 
 // Click outside to close bloom overlay
