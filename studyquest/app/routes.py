@@ -11,6 +11,7 @@ from app.xp_helpers import (
     xp_to_level, xp_into_level, xp_to_next_level,
     level_title, avatar_emoji,
 )
+from app.quest_helpers import validate_quest_form
 
 
 #flash rate limit error instead of causing 429 too many requests -jacob
@@ -174,28 +175,7 @@ def create_quest():
         errors = []
 
         # Validation
-        if not title:
-            errors.append("Title is required.")
-        if not description:
-            errors.append("Description is required.")
-        elif len(description) < 10:
-            errors.append("Description must be at least 10 characters.")
-        valid_types = ["study", "assignment", "exam", "personal"]
-        if quest_type not in valid_types:
-            errors.append("Invalid quest type selected.")
-        valid_difficulties = ["easy", "medium", "hard"]
-        if difficulty not in valid_difficulties:
-            errors.append("Invalid difficulty selected.")
-        due_date_obj = None
-        if due_date:
-            try:
-                due_date_obj = datetime.strptime(due_date, "%Y-%m-%d").date()
-
-                if due_date_obj < date.today():
-                    errors.append("Due date cannot be in the past.")
-
-            except ValueError:
-                errors.append("Invalid due date format.")
+        errors, due_date_obj = validate_quest_form(title, description, quest_type, difficulty, due_date)
 
         # display errors
         if errors:
@@ -299,33 +279,7 @@ def edit_quest(quest_id):
         due_date = request.form.get("due_date")
 
         # validation (same rules as create)
-        errors = []
-
-        if not title:
-            errors.append("Title is required.")
-        if not description:
-            errors.append("Description is required.")
-        elif len(description) < 10:
-            errors.append("Description must be at least 10 characters.")
-
-        valid_types = ["study", "assignment", "exam", "personal"]
-        if quest_type not in valid_types:
-            errors.append("Invalid quest type selected.")
-
-        valid_difficulties = ["easy", "medium", "hard"]
-        if difficulty not in valid_difficulties:
-            errors.append("Invalid difficulty selected.")
-
-        due_date_obj = None
-        if due_date:
-            try:
-                due_date_obj = datetime.strptime(due_date, "%Y-%m-%d").date()
-
-                if due_date_obj < date.today():
-                    errors.append("Due date cannot be in the past.")
-
-            except ValueError:
-                errors.append("Invalid due date format.")
+        errors, due_date_obj = validate_quest_form(title, description, quest_type, difficulty, due_date)
 
         if errors:
             for e in errors:
