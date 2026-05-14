@@ -67,11 +67,11 @@ From `studyquest/` with your venv active.
 Unit tests (in-memory SQLite, won't touch your dev db):
 
 ```bash
-python -m unittest discover -s tests/unit -v
+python -m unittest discover -s tests/unit_tests -v
 ```
 
 Selenium tests spin up the Flask app on port 5000 in the background, so make sure nothing else is using it. `webdriver_manager` will pull a matching ChromeDriver automatically.
 
 ```bash
-python -m unittest discover -s tests/selenium -v
+python -m unittest discover -s tests/selenium_tests -v
 ```
