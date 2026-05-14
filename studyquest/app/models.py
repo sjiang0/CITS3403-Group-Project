@@ -25,20 +25,18 @@ class Quest(db.Model):
     user = db.relationship('User', back_populates='quests')
 
     def mark_completed(self):
+        "Responsible for quest comletion and XP reward logic"
         self.status = "Completed"
         self.date_completed = date.today()
 
         xp_map = {
             "easy": 10,
-            "medium": 20,
-            "hard": 40
+            "medium": 25,
+            "hard": 50
         }
 
         reward = xp_map.get(self.difficulty, 10)
-
         self.user.xp = (self.user.xp or 0) + reward
-
-        self.user.last_active = date.today()
 
 
 class User(UserMixin, db.Model):
