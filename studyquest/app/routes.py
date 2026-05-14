@@ -7,6 +7,12 @@ from app.security import is_strong_password
 from flask_limiter.errors import RateLimitExceeded
 from flask_login import login_user, logout_user, login_required, current_user
 
+from app.xp_helpers import (
+    xp_to_level, xp_into_level, xp_to_next_level,
+    level_title, avatar_emoji,
+)
+
+
 #flash rate limit error instead of causing 429 too many requests -jacob
 @main.errorhandler(RateLimitExceeded)
 def handle_rate_limit(e):
@@ -47,11 +53,14 @@ def dashboard():
 
     active_quests = (overdue_quests + upcoming_quests + no_due_quests)[:3]
 
-    # XP + Level
+    # XP 
     xp = current_user.xp or 0
-    level = (xp // 100) + 1
-    xp_into_level = xp % 100
-    xp_percent = round((xp_into_level / 100) * 100)
+    level = xp_to_level(xp)
+    xp_current = xp_into_level(xp)         # XP into current level
+    xp_remaining = xp_to_next_level(xp)    # XP needed to next level
+    xp_percent = round((xp_current / 100) * 100)
+    title = level_title(level)
+    avatar = avatar_emoji(current_user.username)
 
     # Streak
     streak = current_user.streak or 0
@@ -81,13 +90,16 @@ def dashboard():
 
     return render_template(
         "dashboard.html",
-        today = today,
+        today=today,
         quests=active_quests,
         xp=xp,
         level=level,
-        rank=rank,
-        xp_into_level=xp_into_level,
+        xp_current=xp_current,
+        xp_remaining=xp_remaining,
         xp_percent=xp_percent,
+        level_title=title,
+        avatar=avatar,
+        total_quests=total_quests,
         streak=streak,
         completed_week_count=completed_week_count,
         completion_rate=completion_rate
@@ -152,13 +164,6 @@ def my_quests():
 def create_quest():
     print(request.method)
     if request.method == 'POST':
-        # Debugging TODO: remove
-        print("Form Submitted!")
-        print("Title:", request.form.get('title'))
-        print("Description:", request.form.get('description'))
-        print("Quest Type:", request.form.get('quest_type'))
-        print("Difficulty:", request.form.get('difficulty'))
-
         # Extract the form data
         title = request.form.get('title')
         description = request.form.get('description')
@@ -213,7 +218,7 @@ def create_quest():
 
         flash('Quest created successfully!', 'flash-success')
 
-        return redirect(url_for('main.my_quests')) #TODO: decide where to redirect
+        return redirect(url_for('main.my_quests')) 
     return render_template("create_quest.html")
 
 
@@ -415,11 +420,6 @@ def register():
 # ═══════════════════════════════════════════════════════════
 # Leaderboard, Profile & User Search (Nuowei Dong)
 # ═══════════════════════════════════════════════════════════
-from app.xp_helpers import (
-    xp_to_level, xp_into_level, xp_to_next_level,
-    level_title, avatar_emoji,
-)
-
 
 @main.route("/leaderboard")
 @login_required
