@@ -239,22 +239,11 @@ def delete_quest(quest_id):
 def complete_quest(quest_id):
     quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
 
-    # mark quest complete + award XP + update last_active
+    # mark quest complete + award XP 
     quest.mark_completed()
 
     # update streak logic
-    today = date.today()
-
-    if current_user.last_active:
-        if (today - current_user.last_active).days == 1:
-            current_user.streak += 1
-        elif current_user.last_active != today:
-            current_user.streak = 1
-    else:
-        current_user.streak = 1
-
-    current_user.last_active = today
-
+    current_user.update_streak()
     db.session.commit()
 
     # AJAX

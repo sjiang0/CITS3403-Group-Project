@@ -57,6 +57,24 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
+    def update_streak(self):
+        today = date.today()
+        prev = self.last_active
+
+        if prev is None:
+            self.streak = 1
+
+        elif prev == today:
+            return
+
+        elif (today - prev).days == 1:
+            self.streak += 1
+
+        else:
+            self.streak = 1
+
+        self.last_active = today
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
