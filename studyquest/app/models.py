@@ -25,20 +25,18 @@ class Quest(db.Model):
     user = db.relationship('User', back_populates='quests')
 
     def mark_completed(self):
+        "Responsible for quest comletion and XP reward logic"
         self.status = "Completed"
         self.date_completed = date.today()
 
         xp_map = {
             "easy": 10,
-            "medium": 20,
-            "hard": 40
+            "medium": 25,
+            "hard": 50
         }
 
         reward = xp_map.get(self.difficulty, 10)
-
         self.user.xp = (self.user.xp or 0) + reward
-
-        self.user.last_active = date.today()
 
 
 class User(UserMixin, db.Model):
@@ -59,6 +57,24 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
+    def update_streak(self):
+        today = date.today()
+        prev = self.last_active
+
+        if prev is None:
+            self.streak = 1
+
+        elif prev == today:
+            return
+
+        elif (today - prev).days == 1:
+            self.streak += 1
+
+        else:
+            self.streak = 1
+
+        self.last_active = today
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))

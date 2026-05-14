@@ -6,25 +6,20 @@
 
 <div class="page-header">
   <h2 class="text-2xl font-bold">
-    Welcome back, {{ current_user.username }}!
+    {{ avatar }} Welcome back, {{ current_user.username }}!
   </h2>
 </div>
 
 <!-- XP SECTION -->
 <section class="card mb-5">
-
-  {% set level = (current_user.xp // 100) + 1 %}
-  {% set xp_into_level = current_user.xp % 100 %}
-  {% set xp_percent = xp_into_level %}
-
   <div>
-    <p class="font-semibold mb-2">Level {{ level }}</p>
+    <p class="font-semibold mb-2">Level {{ level }} — {{ level_title }}</p>
 
     <div class="xp-bar-container" style="width: 100%;">
         <div class="xp-bar-fill" style="--xp: {{ xp_percent|int if xp_percent|int > 2 else 2 }}%;"></div>
     </div>
     <p class="xp-label">
-      {{ xp_into_level }} / 100 XP
+      {{ xp_current }} / 100 XP
     </p>
   </div>
 
@@ -38,26 +33,26 @@
 
     <div class="stat-card">
       <div class="stat-value">
-        {{ completed_week_count }}
+        📜 {{ completed_week_count }}
       </div>
       <div class="stat-label">Completed this week</div>
     </div>
 
     <div class="stat-card">
       <div class="stat-value">
-        {{ current_user.streak }}
+        🔥{{ current_user.streak }}
       </div>
       <div class="stat-label">Day streak</div>
     </div>
 
     <div class="stat-card">
-      <div class="stat-value">#{{ rank }}</div>
-      <div class="stat-label">Rank</div>
+      <div class="stat-value">🌱 {{ total_quests }}</div>
+      <div class="stat-label">Total Quests</div>
     </div>
 
     <div class="stat-card">
       <div class="stat-value">
-        {{ completion_rate }}%
+        📈 {{ completion_rate }}%
       </div>
       <div class="stat-label">Completion rate</div>
     </div>

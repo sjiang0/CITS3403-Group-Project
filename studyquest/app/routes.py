@@ -6,6 +6,14 @@ from datetime import datetime, date
 from app.security import is_strong_password
 from flask_limiter.errors import RateLimitExceeded
 from flask_login import login_user, logout_user, login_required, current_user
+from sqlalchemy import or_
+
+from app.xp_helpers import (
+    xp_to_level, xp_into_level, xp_to_next_level,
+    level_title, avatar_emoji,
+)
+from app.quest_helpers import validate_quest_form
+
 
 #flash rate limit error instead of causing 429 too many requests -jacob
 @main.errorhandler(RateLimitExceeded)
@@ -47,21 +55,17 @@ def dashboard():
 
     active_quests = (overdue_quests + upcoming_quests + no_due_quests)[:3]
 
-    # XP + Level
+    # XP 
     xp = current_user.xp or 0
-    level = (xp // 100) + 1
-    xp_into_level = xp % 100
-    xp_percent = round((xp_into_level / 100) * 100)
+    level = xp_to_level(xp)
+    xp_current = xp_into_level(xp)         # XP into current level
+    xp_remaining = xp_to_next_level(xp)    # XP needed to next level
+    xp_percent = round((xp_current / 100) * 100)
+    title = level_title(level)
+    avatar = avatar_emoji(current_user.username)
 
     # Streak
     streak = current_user.streak or 0
-
-    # Rank
-    all_users = User.query.order_by(User.xp.desc()).all()
-    rank = next(
-        (i + 1 for i, u in enumerate(all_users) if u.id == current_user.id),
-        None
-    )
 
     # Completed quests (for weekly stats)
     completed_quests = Quest.query.filter_by(
@@ -81,13 +85,16 @@ def dashboard():
 
     return render_template(
         "dashboard.html",
-        today = today,
+        today=today,
         quests=active_quests,
         xp=xp,
         level=level,
-        rank=rank,
-        xp_into_level=xp_into_level,
+        xp_current=xp_current,
+        xp_remaining=xp_remaining,
         xp_percent=xp_percent,
+        level_title=title,
+        avatar=avatar,
+        total_quests=total_quests,
         streak=streak,
         completed_week_count=completed_week_count,
         completion_rate=completion_rate
@@ -101,7 +108,7 @@ def my_quests():
     active_q = Quest.query.filter(
         Quest.user_id == current_user.id,
         Quest.status == "In Progress",
-        (Quest.due_date == None) | (Quest.due_date >= today)
+        or_(Quest.due_date.is_(None), Quest.due_date >= today)
     ).all()
 
     completed_q = Quest.query.filter_by(
@@ -152,13 +159,6 @@ def my_quests():
 def create_quest():
     print(request.method)
     if request.method == 'POST':
-        # Debugging TODO: remove
-        print("Form Submitted!")
-        print("Title:", request.form.get('title'))
-        print("Description:", request.form.get('description'))
-        print("Quest Type:", request.form.get('quest_type'))
-        print("Difficulty:", request.form.get('difficulty'))
-
         # Extract the form data
         title = request.form.get('title')
         description = request.form.get('description')
@@ -169,28 +169,7 @@ def create_quest():
         errors = []
 
         # Validation
-        if not title:
-            errors.append("Title is required.")
-        if not description:
-            errors.append("Description is required.")
-        elif len(description) < 10:
-            errors.append("Description must be at least 10 characters.")
-        valid_types = ["study", "assignment", "exam", "personal"]
-        if quest_type not in valid_types:
-            errors.append("Invalid quest type selected.")
-        valid_difficulties = ["easy", "medium", "hard"]
-        if difficulty not in valid_difficulties:
-            errors.append("Invalid difficulty selected.")
-        due_date_obj = None
-        if due_date:
-            try:
-                due_date_obj = datetime.strptime(due_date, "%Y-%m-%d").date()
-
-                if due_date_obj < date.today():
-                    errors.append("Due date cannot be in the past.")
-
-            except ValueError:
-                errors.append("Invalid due date format.")
+        errors, due_date_obj = validate_quest_form(title, description, quest_type, difficulty, due_date)
 
         # display errors
         if errors:
@@ -213,7 +192,7 @@ def create_quest():
 
         flash('Quest created successfully!', 'flash-success')
 
-        return redirect(url_for('main.my_quests')) #TODO: decide where to redirect
+        return redirect(url_for('main.my_quests')) 
     return render_template("create_quest.html")
 
 
@@ -239,22 +218,11 @@ def delete_quest(quest_id):
 def complete_quest(quest_id):
     quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
 
-    # mark quest complete + award XP + update last_active
+    # mark quest complete + award XP 
     quest.mark_completed()
 
     # update streak logic
-    today = date.today()
-
-    if current_user.last_active:
-        if (today - current_user.last_active).days == 1:
-            current_user.streak += 1
-        elif current_user.last_active != today:
-            current_user.streak = 1
-    else:
-        current_user.streak = 1
-
-    current_user.last_active = today
-
+    current_user.update_streak()
     db.session.commit()
 
     # AJAX
@@ -305,33 +273,7 @@ def edit_quest(quest_id):
         due_date = request.form.get("due_date")
 
         # validation (same rules as create)
-        errors = []
-
-        if not title:
-            errors.append("Title is required.")
-        if not description:
-            errors.append("Description is required.")
-        elif len(description) < 10:
-            errors.append("Description must be at least 10 characters.")
-
-        valid_types = ["study", "assignment", "exam", "personal"]
-        if quest_type not in valid_types:
-            errors.append("Invalid quest type selected.")
-
-        valid_difficulties = ["easy", "medium", "hard"]
-        if difficulty not in valid_difficulties:
-            errors.append("Invalid difficulty selected.")
-
-        due_date_obj = None
-        if due_date:
-            try:
-                due_date_obj = datetime.strptime(due_date, "%Y-%m-%d").date()
-
-                if due_date_obj < date.today():
-                    errors.append("Due date cannot be in the past.")
-
-            except ValueError:
-                errors.append("Invalid due date format.")
+        errors, due_date_obj = validate_quest_form(title, description, quest_type, difficulty, due_date)
 
         if errors:
             for e in errors:
@@ -426,11 +368,6 @@ def register():
 # ═══════════════════════════════════════════════════════════
 # Leaderboard, Profile & User Search (Nuowei Dong)
 # ═══════════════════════════════════════════════════════════
-from app.xp_helpers import (
-    xp_to_level, xp_into_level, xp_to_next_level,
-    level_title, avatar_emoji,
-)
-
 
 @main.route("/leaderboard")
 @login_required
