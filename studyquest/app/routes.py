@@ -6,6 +6,7 @@ from datetime import datetime, date
 from app.security import is_strong_password
 from flask_limiter.errors import RateLimitExceeded
 from flask_login import login_user, logout_user, login_required, current_user
+from sqlalchemy import or_
 
 from app.xp_helpers import (
     xp_to_level, xp_into_level, xp_to_next_level,
@@ -114,7 +115,7 @@ def my_quests():
     active_q = Quest.query.filter(
         Quest.user_id == current_user.id,
         Quest.status == "In Progress",
-        (Quest.due_date == None) | (Quest.due_date >= today)
+        or_(Quest.due_date.is_(None), Quest.due_date >= today)
     ).all()
 
     completed_q = Quest.query.filter_by(
