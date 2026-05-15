@@ -5,7 +5,9 @@ from flask_wtf import CSRFProtect
 from .config import DeploymentConfig
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
+from .xp_helpers import xp_to_level, level_title, avatar_emoji
+
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -26,4 +28,24 @@ def create_app(config_class=DeploymentConfig):
     from app.blueprints import main
     app.register_blueprint(main)
 
+    # Context processor for base.html
+    @app.context_processor
+    def inject_xp_vars():
+        if hasattr(current_user, "is_authenticated") and current_user.is_authenticated:
+            user_level = xp_to_level(current_user.xp)
+            avatar = avatar_emoji(current_user.username)
+            level_name = level_title(user_level)
+            return {
+                "user_level": user_level,
+                "avatar": avatar,
+                "level_name": level_name,
+            }
+        return {
+            "user_level": 0,
+            "avatar": "",
+            "level_name": "",
+        }
+
     return app
+
+
