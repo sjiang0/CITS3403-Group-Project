@@ -9,7 +9,7 @@
    05. Layout           15. Difficulty Chips   25. Animations
    06. Sidebar Brand    16. Badges & Tags      26. Responsive
    07. Sidebar Nav      17. Quest Items        27. Utilities
-   08. Char Card        18. Flash Messages     
+   08. Char Card        18. Flash Messages     28. Login and Register
    09. XP Bar           19. Leaderboard     
    10. Sidebar Bottom   20. Stat Cards       
 ============================================================ */
@@ -576,3 +576,73 @@ hr, .divider { height: 1px; background: linear-gradient(90deg, transparent, var(
 .search-no-results { padding: .6rem; color: var(--bark-light); font-style: italic; font-size: .8rem; }
 .search-error { padding: .6rem; color: var(--rose); font-size: .8rem; }
 .badge-spaced-right { margin-right: .375rem; }
+
+/* ── 29. Login and Register ─────────────────── */
+#main-content > div {
+  border-color: var(--parchment-dark) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-lg) !important;
+  overflow: hidden !important;
+}
+
+#main-content > div > div:first-child {
+  background: linear-gradient(135deg, var(--parchment-mid), var(--parchment)) !important;
+  border-color: var(--parchment-dark) !important;
+}
+
+#main-content h2, #main-content h3 {
+  font-family: var(--font-display) !important;
+  color: var(--bark-mid) !important;
+}
+
+#main-content label {
+  font-family: var(--font-body) !important;
+  font-size: var(--text-sm) !important;
+  font-weight: 600 !important;
+  color: var(--bark-mid) !important;
+}
+
+#main-content p { color: var(--bark-light) !important; }
+
+#main-content input[type="text"],
+
+#main-content input[type="password"] {
+  border: 1.5px solid var(--parchment-dark) !important;
+  border-radius: var(--radius-md) !important;
+  font-family: var(--font-body) !important;
+  color: var(--bark-mid) !important;
+  background: var(--parchment) !important;
+  outline: none !important;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast) !important;
+}
+
+#main-content input[type="text"]:focus,
+
+#main-content input[type="password"]:focus {
+  border-color: var(--moss-light) !important;
+  box-shadow: 0 0 0 3px rgba(194,72,120,.12) !important;
+}
+
+#main-content button[type="submit"] {
+  background: linear-gradient(135deg, var(--moss), var(--moss-mid)) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  font-family: var(--font-body) !important;
+  font-weight: 700 !important;
+  font-size: var(--text-sm) !important;
+  box-shadow: 0 2px 8px rgba(194,72,120,.3) !important;
+  transition: all var(--transition-fast) !important;
+}
+
+#main-content button[type="submit"]:hover {
+  background: linear-gradient(135deg, var(--moss-mid), var(--moss-light)) !important;
+  box-shadow: 0 4px 12px rgba(194,72,120,.38) !important;
+}
+
+#main-content a {
+  color: var(--moss) !important;
+  font-weight: 600 !important;
+}
+
+#main-content a:hover { color: var(--moss-mid) !important; }
