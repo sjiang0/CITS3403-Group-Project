@@ -362,6 +362,118 @@ h4 { font-size: var(--text-lg);  font-weight: 600; }
 .auth-title  { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 700; color: var(--bark-mid); }
 .auth-subtitle { font-size: var(--text-sm); color: var(--bark-light); font-style: italic; margin-top: .25rem; }
 
+/* ── AUTH SPLIT LAYOUT ─────────────────────────────────── */
+.auth-split-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-split-card {
+  display: flex;
+  max-width: 800px;
+  width: 100%;
+  background: var(--cream);
+  border: 1px solid var(--parchment-dark);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  position: relative;
+}
+
+.auth-split-left {
+  width: 33%;
+  background: linear-gradient(135deg, var(--moss-ghost), var(--parchment));
+  border-right: 1px solid var(--parchment-dark);
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.auth-split-left::before {
+  content: '✿';
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  color: var(--moss-pale);
+  font-size: 1.5rem;
+  opacity: .4;
+}
+
+.auth-split-left h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: var(--bark-mid);
+  margin-bottom: .75rem;
+}
+
+.auth-split-left p {
+  color: var(--bark-light);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.auth-split-right {
+  flex: 1;
+  padding: 3rem 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-split-form {
+  width: 100%;
+  max-width: 320px;
+}
+
+.auth-split-form h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--bark-mid);
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.auth-split-footer {
+  text-align: center;
+  margin-top: 1.25rem;
+  font-size: var(--text-sm);
+  color: var(--bark-light);
+}
+
+.auth-split-footer a {
+  color: var(--moss);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.auth-split-footer a:hover {
+  color: var(--moss-mid);
+}
+
+@media (max-width: 768px) {
+  .auth-split-card {
+    flex-direction: column;
+  }
+  
+  .auth-split-left {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--parchment-dark);
+    padding: 2rem 1.5rem;
+  }
+  
+  .auth-split-right {
+    padding: 2rem 1.5rem;
+  }
+}
+
 /* ── 15. DIFFICULTY CHIPS ──────────────────────────────── */
 .difficulty-chips { display: flex; gap: .5rem; flex-wrap: wrap; }
 .difficulty-chip {
