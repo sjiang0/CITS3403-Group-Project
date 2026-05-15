@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Study Quest{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.tailwindcss.com"></script>
   {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -76,24 +77,17 @@
   <div class="sidebar-divider"></div>
 
   <!-- Character Card -->
-  {% from 'xp_helpers.html' import xp_to_level, xp_into_level, level_title, avatar_emoji %}
-  {% set user_level = xp_to_level(current_user.xp) %}
-  {% set xp_into_level = xp_into_level(current_user.xp) %}
-  {% set xp_percent = (xp_into_level / 100) * 100 %}
-  
   <a href="{{ url_for('main.profile') }}" class="char-card">
     <div class="char-header">
-      <div class="char-avatar">{{ avatar_emoji(current_user.username) }}</div>
+      <div class="char-avatar">{{ avatar }}</div>
       <div class="char-info">
-        <div class="char-name">{{ current_user.username }}</div>
-        <div class="char-class">{{ level_title(user_level) }}</div>
+          <div class="char-name">{{ current_user.username }}</div>
+          <div class="char-class">{{ level_name }}</div>
       </div>
-      <span class="char-level-badge">Lv {{ user_level }}</span>
+      <div>
+        <span class="char-level-badge">Lv {{ user_level }}</span>
+      </div>
     </div>
-    <div class="xp-bar-container">
-      <div class="xp-bar-fill" style="--xp: {{ xp_percent }}%"></div>
-    </div>
-    <div class="xp-label">{{ xp_into_level }} / 100 XP</div>
   </a>
 
   <!-- Logout -->
@@ -130,39 +124,8 @@
 
 </main>
 
-
-
 <!-- Base Scripts -->
-<script>
-  // Mobile menu toggle
-  document.addEventListener('DOMContentLoaded', function() {
-    const menuBtn = document.getElementById('mobile-menu-btn');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    
-    if (menuBtn && sidebar && overlay) {
-      menuBtn.addEventListener('click', function() {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('active');
-      });
-      
-      overlay.addEventListener('click', function() {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-      });
-    }
-
-    // Auto-dismiss flash messages after 5 seconds
-    const flashes = document.querySelectorAll('.flash-container > div');
-    flashes.forEach(flash => {
-      setTimeout(() => {
-        flash.classList.add('removing');
-        setTimeout(() => flash.remove(), 300);
-      }, 5000);
-    });
-  });
-</script>
-
+<script src="{{ url_for('static', filename='js/base.js') }}"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
