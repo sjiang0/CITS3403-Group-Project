@@ -1,6 +1,6 @@
 from . import db, login_manager
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import date
+from datetime import date, timedelta
 from flask_login import UserMixin
 
 
@@ -18,8 +18,6 @@ class Quest(db.Model):
 
     status = db.Column(db.String(50), default="In Progress")
     date_completed = db.Column(db.Date, nullable=True)
-
-    xp_reward = db.Column(db.Integer, default=10)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', back_populates='quests')
@@ -48,6 +46,7 @@ class User(UserMixin, db.Model):
     xp = db.Column(db.Integer, default=0)
     streak = db.Column(db.Integer, default=0)
     last_active = db.Column(db.Date, nullable=True)
+    streak_last_updated = db.Column(db.Date, nullable=True) # to only increment streak once per day even if multiple quests completed
 
     quests = db.relationship('Quest', back_populates='user')
 
@@ -58,22 +57,37 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
     
     def update_streak(self):
+        """Increment streak by 1 once per day when user completes a quest."""
         today = date.today()
-        prev = self.last_active
 
-        if prev is None:
-            self.streak = 1
+        # Only increment if we haven't incremented today yet
+        if self.streak_last_updated == today:
+            return  # already incremented today
 
-        elif prev == today:
-            return
+        # Increment streak
+        self.streak += 1
+        self.streak_last_updated = today
+        db.session.commit()
 
-        elif (today - prev).days == 1:
-            self.streak += 1
+    def record_login(self):
+        """Update last_active and reset streak if last login was before yesterday OR no quest completed yesterday."""
+        today = date.today()
+        yesterday = today - timedelta(days=1)
 
-        else:
-            self.streak = 1
+        # Did user complete a quest yesterday?
+        completed_yesterday = Quest.query.filter_by(
+            user_id=self.id,
+            status="Completed",
+            date_completed=yesterday
+        ).first() is not None
 
+        # Reset streak if last login before yesterday OR no completed quest yesterday
+        if self.last_active is None or self.last_active < yesterday or not completed_yesterday:
+            self.streak = 0
+
+        # Update last_active to today (prevents multiple resets in same day)
         self.last_active = today
+        db.session.commit()
 
 @login_manager.user_loader
 def load_user(user_id):

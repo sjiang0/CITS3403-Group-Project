@@ -316,6 +316,7 @@ def login():
             return redirect(url_for("main.login"))
 
         login_user(user)
+        user.record_login()
 
         flash("Logged in successfully!", "flash-success")
         return redirect(url_for("main.dashboard"))
