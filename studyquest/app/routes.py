@@ -244,6 +244,17 @@ def uncomplete_quest(quest_id):
 
     quest.status = "In Progress"
     quest.date_completed = None
+    # Determine the XP to remove based on difficulty
+    xp_lost = 0
+    if quest.difficulty == "easy":
+        xp_lost = 10
+    elif quest.difficulty == "medium":
+        xp_lost = 25
+    elif quest.difficulty == "hard":
+        xp_lost = 50
+
+    # Revert XP
+    current_user.xp = max((current_user.xp or 0) - xp_lost, 0)
 
     db.session.commit()
 
@@ -316,6 +327,7 @@ def login():
             return redirect(url_for("main.login"))
 
         login_user(user)
+        user.record_login()
 
         flash("Logged in successfully!", "flash-success")
         return redirect(url_for("main.dashboard"))
