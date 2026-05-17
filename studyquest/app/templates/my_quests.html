@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}My Quests - Study Quest{% endblock %}
+
+{% block content %}
+
+<h2 class="text-2xl font-bold mb-6">My Quests</h2>
+
+<!-- QUEST STATS -->
+<section class="card mb-5">
+  <h3 class="font-bold mb-3">Quest Stats</h3>
+  <div class="grid-stats">
+    <div class="stat-card">
+      <div class="stat-value" id="total-count">{{ total_quests }}</div>
+      <div class="stat-label">Total</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value" id="active-count">{{ active_count }}</div>
+      <div class="stat-label">Active</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value" id="completed-count">{{ completed_count }}</div>
+      <div class="stat-label">Completed</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value" id="overdue-count">{{ overdue_count }}</div>
+      <div class="stat-label">Overdue</div>
+    </div>
+  </div>
+</section>
+
+<!-- FILTERS -->
+<section class="card mb-5">
+  <h3 class="font-bold mb-2">Filter Quests</h3>
+  <div class="flex gap-2 flex-wrap">
+      <button class="btn btn-gold btn-sm filter-btn" id="all-btn">All</button>
+
+      <button class="btn btn-outline btn-sm filter-btn" data-section="active">Active</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-section="completed">Completed</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-section="overdue">Overdue</button>
+  </div>
+  <div class="flex gap-2 flex-wrap mt-3">
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-difficulty="easy">Easy</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-difficulty="medium">Medium</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-difficulty="hard">Hard</button>
+
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-type="study">Study</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-type="exam">Exam Prep</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-type="personal">Personal</button>
+      <button class="btn btn-outline btn-sm filter-btn" data-filter-type="assignment">Assignment</button>
+  </div>
+</section>
+
+<!-- ================= OVERDUE ================= -->
+<section class="card mb-5" id="overdue-section">
+  <h3 class="font-bold mb-3">Overdue Quests</h3>
+
+  <ul class="space-y-2">
+    {% for quest in overdue_quests %}
+      <li class="quest-item"
+          data-status="overdue"
+          data-due-date="{{ quest.due_date }}"
+          data-difficulty="{{ quest.difficulty|lower }}"
+          data-type="{{ quest.quest_type|lower }}">
+
+        <div class="quest-body">
+
+          <div class="quest-title">❌ {{ quest.title }}</div>
+
+          <div class="quest-meta">
+            {{ quest.description }}<br>
+            {{ quest.quest_type | capitalize }} • {{ quest.difficulty | capitalize }}
+            • Due {{ quest.due_date.strftime('%d %b') }}
+          </div>
+
+        </div>
+
+        <div class="quest-actions">
+
+          {% if quest.status != "Completed" %}
+          <a href="{{ url_for('main.edit_quest', quest_id=quest.id) }}" class="btn btn-outline btn-sm">Edit</a>
+          {% endif %}
+
+          {% if quest.status != "Completed" %}
+          <form method="POST"
+                action="{{ url_for('main.complete_quest', quest_id=quest.id) }}"
+                class="complete-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-outline btn-sm">Complete</button>
+          </form>
+          {% endif %}
+
+          <form method="POST"
+                action="{{ url_for('main.delete_quest', quest_id=quest.id) }}"
+                class="delete-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger btn-sm">
+              Delete
+            </button>
+          </form>
+
+        </div>
+
+      </li>
+    {% else %}
+      <li>No overdue quests</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<!-- ================= ACTIVE ================= -->
+<section class="card mb-5" id="active-section">
+  <h3 class="font-bold mb-3">Active Quests</h3>
+
+  <ul class="space-y-2">
+
+    {% for quest in active_quests_with_due_date %}
+      <li class="quest-item"
+          data-status="active"
+          data-due-date="{{ quest.due_date }}"
+          data-difficulty="{{ quest.difficulty|lower }}"
+          data-type="{{ quest.quest_type|lower }}">
+
+        <div class="quest-body">
+
+          <div class="quest-title">{{ quest.title }}</div>
+
+          <div class="quest-meta">
+            {{ quest.description }}<br>
+            {{ quest.quest_type | capitalize }} • {{ quest.difficulty | capitalize }}
+            • Due {{ quest.due_date.strftime('%d %b') }}
+          </div>
+
+        </div>
+
+        <div class="quest-actions">
+          <a href="{{ url_for('main.edit_quest', quest_id=quest.id) }}" class="btn btn-outline btn-sm">Edit</a>
+          <form method="POST"
+                action="{{ url_for('main.complete_quest', quest_id=quest.id) }}"
+                class="complete-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-outline btn-sm">Complete</button>
+          </form>
+          <form method="POST"
+                action="{{ url_for('main.delete_quest', quest_id=quest.id) }}"
+                class="delete-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger btn-sm">
+              Delete
+            </button>
+          </form>
+        </div>
+
+      </li>
+    {% endfor %}
+
+    {% for quest in active_quests_no_due_date %}
+      <li class="quest-item"
+          data-status="active"
+          data-due-date=""
+          data-difficulty="{{ quest.difficulty|lower }}"
+          data-type="{{ quest.quest_type|lower }}">
+
+        <div class="quest-body">
+
+          <div class="quest-title">{{ quest.title }}</div>
+
+          <div class="quest-meta">
+            {{ quest.description }}<br>
+            {{ quest.quest_type | capitalize }} • {{ quest.difficulty | capitalize }}
+            • No due date
+          </div>
+
+        </div>
+
+        <div class="quest-actions">
+          <a href="{{ url_for('main.edit_quest', quest_id=quest.id) }}" class="btn btn-outline btn-sm">Edit</a>
+          <form method="POST"
+                action="{{ url_for('main.complete_quest', quest_id=quest.id) }}"
+                class="complete-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-outline btn-sm">Complete</button>
+          </form>
+          <form method="POST"
+                action="{{ url_for('main.delete_quest', quest_id=quest.id) }}"
+                class="delete-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger btn-sm">
+              Delete
+            </button>
+          </form>
+        </div>
+
+      </li>
+    {% endfor %}
+
+  </ul>
+</section>
+
+<!-- ================= COMPLETED ================= -->
+<section class="card p-4" id="completed-section">
+  <h3 class="font-bold mb-3">Completed Quests</h3>
+
+  <ul class="space-y-2">
+
+    {% for quest in completed_quests_with_due_date + completed_quests_no_due_date %}
+      <li class="quest-item complete"
+          data-status="completed"
+          data-due-date="{{ quest.due_date }}"
+          data-difficulty="{{ quest.difficulty|lower }}"
+          data-type="{{ quest.quest_type|lower }}">
+
+        <div class="quest-body">
+
+          <div class="quest-title">✅ {{ quest.title }}</div>
+
+          <div class="quest-meta">
+            {{ quest.description }}<br>
+            {{ quest.quest_type | capitalize }} • {{ quest.difficulty | capitalize }}
+
+            {% if quest.due_date %}
+              • Due {{ quest.due_date.strftime('%d %b') }}
+            {% else %}
+              • No due date
+            {% endif %}
+          </div>
+
+        </div>
+
+        <div class="quest-actions">
+
+          <form method="POST" action="{{ url_for('main.uncomplete_quest', quest_id=quest.id) }}" class="uncomplete-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-gold btn-sm">Uncomplete</button>
+          </form>
+
+          <form method="POST"
+                action="{{ url_for('main.delete_quest', quest_id=quest.id) }}"
+                class="delete-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger btn-sm">
+              Delete
+            </button>
+          </form>
+
+        </div>
+
+      </li>
+    {% else %}
+      <li>No completed quests</li>
+    {% endfor %}
+
+  </ul>
+</section>
+<script src="{{ url_for('static', filename='js/quest-filters.js') }}"></script>
+<script src="{{ url_for('static', filename='js/quest-actions.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,482 @@
+from flask import render_template, jsonify, request, redirect, url_for, flash
+from app import db, limiter
+from app.blueprints import main
+from app.models import User, Quest
+from datetime import datetime, date
+from app.security import is_strong_password
+from flask_limiter.errors import RateLimitExceeded
+from flask_login import login_user, logout_user, login_required, current_user
+from sqlalchemy import or_
+
+from app.xp_helpers import (
+    xp_to_level, xp_into_level, xp_to_next_level,
+    level_title, avatar_emoji,
+)
+from app.quest_helpers import validate_quest_form
+
+
+#flash rate limit error instead of causing 429 too many requests -jacob
+@main.errorhandler(RateLimitExceeded)
+def handle_rate_limit(e):
+    flash(str(e.description), "flash-error")
+    return redirect(request.referrer or url_for("main.login"))
+
+
+@main.route("/") 
+def landing():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+    return render_template("landing.html")
+
+@main.route("/dashboard")
+@login_required
+def dashboard():
+    # extract 3 active quests. 
+    # priority order: overdue > active with due date > active no due date
+    today = date.today()
+
+    overdue_quests = Quest.query.filter(
+        Quest.user_id == current_user.id,
+        Quest.status == "In Progress",
+        Quest.due_date < today
+    ).order_by(Quest.due_date.asc()).all()
+
+    upcoming_quests = Quest.query.filter(
+        Quest.user_id == current_user.id,
+        Quest.status == "In Progress",
+        Quest.due_date >= today
+    ).order_by(Quest.due_date.asc()).all()
+
+    no_due_quests = Quest.query.filter(
+        Quest.user_id == current_user.id,
+        Quest.status == "In Progress",
+        Quest.due_date == None
+    ).all()
+
+    active_quests = (overdue_quests + upcoming_quests + no_due_quests)[:3]
+
+    # XP 
+    xp = current_user.xp or 0
+    level = xp_to_level(xp)
+    xp_current = xp_into_level(xp)         # XP into current level
+    xp_remaining = xp_to_next_level(xp)    # XP needed to next level
+    xp_percent = round((xp_current / 100) * 100)
+    title = level_title(level)
+    avatar = avatar_emoji(current_user.username)
+
+    # Streak
+    streak = current_user.streak or 0
+
+    # Completed quests (for weekly stats)
+    completed_quests = Quest.query.filter_by(
+        user_id=current_user.id,
+        status="Completed"
+    ).all()
+
+    today = date.today()
+
+    completed_week_count = sum(
+        1 for q in completed_quests
+        if q.date_completed and (today - q.date_completed).days <= 7
+    )
+
+    total_quests = Quest.query.filter_by(user_id=current_user.id).count()
+    completion_rate = int((len(completed_quests) / total_quests) * 100) if total_quests else 0
+
+    return render_template(
+        "dashboard.html",
+        today=today,
+        quests=active_quests,
+        xp=xp,
+        level=level,
+        xp_current=xp_current,
+        xp_remaining=xp_remaining,
+        xp_percent=xp_percent,
+        level_title=title,
+        avatar=avatar,
+        total_quests=total_quests,
+        streak=streak,
+        completed_week_count=completed_week_count,
+        completion_rate=completion_rate
+    )
+
+@main.route("/my-quests")
+@login_required
+def my_quests():
+    today = date.today()
+
+    active_q = Quest.query.filter(
+        Quest.user_id == current_user.id,
+        Quest.status == "In Progress",
+        or_(Quest.due_date.is_(None), Quest.due_date >= today)
+    ).all()
+
+    completed_q = Quest.query.filter_by(
+        user_id=current_user.id,
+        status="Completed"
+    ).all()
+
+    active_with_due = sorted(
+        [q for q in active_q if q.due_date],
+        key=lambda x: x.due_date
+    )
+    active_no_due = [q for q in active_q if not q.due_date]
+
+    completed_with_due = sorted(
+        [q for q in completed_q if q.due_date],
+        key=lambda x: x.due_date
+    )
+    completed_no_due = [q for q in completed_q if not q.due_date]
+
+    overdue_quests = Quest.query.filter(
+        Quest.user_id == current_user.id,
+        Quest.status != "Completed",
+        Quest.due_date < today
+    ).order_by(Quest.due_date.asc()).all()
+
+    counts = {
+        "total": Quest.query.filter_by(user_id=current_user.id).count(),
+        "active": len(active_q),
+        "completed": len(completed_q),
+        "overdue": len(overdue_quests)
+    }
+
+    return render_template(
+        "my_quests.html",
+        active_quests_with_due_date=active_with_due,
+        active_quests_no_due_date=active_no_due,
+        completed_quests_with_due_date=completed_with_due,
+        completed_quests_no_due_date=completed_no_due,
+        overdue_quests=overdue_quests,
+        total_quests=counts["total"],
+        active_count=counts["active"],
+        completed_count=counts["completed"],
+        overdue_count=counts["overdue"]
+    )
+
+@main.route('/create-quest', methods=['GET', 'POST'])
+@login_required
+def create_quest():
+    print(request.method)
+    if request.method == 'POST':
+        # Extract the form data
+        title = request.form.get('title')
+        description = request.form.get('description')
+        quest_type = request.form.get('quest_type')
+        difficulty = request.form.get('difficulty')
+        due_date = request.form.get('due_date')
+
+        errors = []
+
+        # Validation
+        errors, due_date_obj = validate_quest_form(title, description, quest_type, difficulty, due_date)
+
+        # display errors
+        if errors:
+            for e in errors:
+                flash(e, "flash-error")
+            return redirect(url_for("main.create_quest"))
+        
+        new_quest = Quest(
+            title=title,
+            description=description,
+            quest_type=quest_type,
+            difficulty=difficulty,
+            due_date=due_date_obj,
+            user_id=current_user.id,
+            status="In Progress"
+        )
+
+        db.session.add(new_quest)
+        db.session.commit()
+
+        flash('Quest created successfully!', 'flash-success')
+
+        return redirect(url_for('main.my_quests')) 
+    return render_template("create_quest.html")
+
+
+@main.route("/quest/<int:quest_id>/delete", methods=["POST"])
+@login_required
+def delete_quest(quest_id):
+    quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
+
+    db.session.delete(quest)
+    db.session.commit()
+
+    # AJAX 
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return jsonify({"success": True})
+
+    # fallback
+    flash("Quest deleted.", "flash-success")
+    return redirect(url_for("main.my_quests"))
+
+
+@main.route("/quest/<int:quest_id>/complete", methods=["POST"])
+@login_required
+def complete_quest(quest_id):
+    quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
+
+    # mark quest complete + award XP 
+    quest.mark_completed()
+
+    # update streak logic
+    current_user.update_streak()
+    db.session.commit()
+
+    # AJAX
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return jsonify({
+            "success": True,
+            "quest_id": quest.id,
+            "status": "completed"
+        })
+    
+    # fallback
+    flash("Quest completed!", "flash-success")
+    return redirect(url_for("main.my_quests"))
+
+@main.route("/quest/<int:quest_id>/uncomplete", methods=["POST"])
+@login_required
+def uncomplete_quest(quest_id):
+    quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
+
+    quest.status = "In Progress"
+    quest.date_completed = None
+    # Determine the XP to remove based on difficulty
+    xp_lost = 0
+    if quest.difficulty == "easy":
+        xp_lost = 10
+    elif quest.difficulty == "medium":
+        xp_lost = 25
+    elif quest.difficulty == "hard":
+        xp_lost = 50
+
+    # Revert XP
+    current_user.xp = max((current_user.xp or 0) - xp_lost, 0)
+
+    db.session.commit()
+
+    # AJAX response
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return jsonify({
+            "success": True,
+            "quest_id": quest.id,
+            "status": "active"
+        })
+
+    # fallback 
+    flash("Quest moved back to active.", "flash-success")
+    return redirect(url_for("main.my_quests"))
+
+@main.route("/quest/<int:quest_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_quest(quest_id):
+    quest = Quest.query.filter_by(id=quest_id, user_id=current_user.id).first_or_404()
+
+    if request.method == "POST":
+
+        title = request.form.get("title")
+        description = request.form.get("description")
+        quest_type = request.form.get("quest_type")
+        difficulty = request.form.get("difficulty")
+        due_date = request.form.get("due_date")
+
+        # validation (same rules as create)
+        errors, due_date_obj = validate_quest_form(title, description, quest_type, difficulty, due_date)
+
+        if errors:
+            for e in errors:
+                flash(e, "flash-error")
+            return redirect(url_for("main.edit_quest", quest_id=quest.id))
+
+        # update fields directly (no need for model method)
+        quest.title = title
+        quest.description = description
+        quest.quest_type = quest_type
+        quest.difficulty = difficulty
+        quest.due_date = due_date_obj
+
+        db.session.commit()
+
+        flash("Quest updated.", "flash-success")
+        return redirect(url_for("main.my_quests"))
+
+    return render_template("edit_quest.html", quest=quest)
+
+
+@main.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute", methods=["POST"], error_message="Too many login attempts, please try again in a minute.")
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+    
+    if request.method == "POST":
+        username = request.form["username"].lower().strip()
+        password = request.form["password"]
+
+        user = User.query.filter_by(username=username).first()
+
+        if not user:
+            flash("Username does not exist.", "flash-error")
+            return redirect(url_for("main.login"))
+
+        if not user.check_password(password):
+            flash("Incorrect password.", "flash-error")
+            return redirect(url_for("main.login"))
+
+        login_user(user)
+        user.record_login()
+
+        flash("Logged in successfully!", "flash-success")
+        return redirect(url_for("main.dashboard"))
+
+    return render_template("login.html")
+
+@main.route("/logout", methods=["POST"])
+def logout():
+    logout_user()
+    flash("You have been logged out.", "flash-info")
+    return redirect(url_for("main.landing"))
+
+@main.route("/register", methods=["GET", "POST"])
+@limiter.limit("20 per hour", methods=["POST"], error_message="Too many registrations, please try again in an hour.")
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+    
+    if request.method == "POST":
+        username = request.form["username"].lower().strip()
+        if len(username) < 3: #added username must be atleast 3 digits check
+            flash("Username must be at least 3 characters.", "flash-error")
+            return redirect(url_for("main.register"))
+        password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+
+        if password != confirm_password:
+            flash("Passwords do not match.", "flash-error")
+            return redirect(url_for("main.register"))
+
+        if not is_strong_password(password):
+            flash("Password must be at least 8 characters and include letters, numbers, and special characters.", "flash-error")
+            return redirect(url_for("main.register"))
+
+        if User.query.filter_by(username=username).first():
+            flash("Username already exists.", "flash-error")
+            return redirect(url_for("main.register"))
+
+        new_user = User(username=username)
+        new_user.set_password(password)
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("Account created! Please log in.", "flash-success")
+        return redirect(url_for("main.login"))
+
+    return render_template("register.html")
+
+# ═══════════════════════════════════════════════════════════
+# Leaderboard, Profile & User Search (Nuowei Dong)
+# ═══════════════════════════════════════════════════════════
+
+@main.route("/leaderboard")
+@login_required
+def leaderboard():
+    users = User.query.order_by(User.xp.desc(), User.id.asc()).all()
+
+    rows = []
+    for i, u in enumerate(users):
+        lvl = xp_to_level(u.xp)
+        rows.append({
+            "rank": i + 1,
+            "user": u,
+            "xp": u.xp or 0,
+            "level": lvl,
+            "title": level_title(lvl),
+            "emoji": avatar_emoji(u.username),
+            "is_current": u.id == current_user.id,
+        })
+
+    me = next((r for r in rows if r["is_current"]), None)
+    next_user = rows[me["rank"] - 2] if (me and me["rank"] > 1) else None
+
+    return render_template(
+        "leaderboard.html",
+        rows=rows,
+        me=me,
+        total=len(users),
+        next_user=next_user,
+    )
+
+
+@main.route("/profile")
+@main.route("/profile/<username>")
+@login_required
+def profile(username=None):
+    if username is None:
+        user = current_user
+    else:
+        user = User.query.filter_by(username=username.lower()).first_or_404()
+
+    xp = user.xp or 0
+    lvl = xp_to_level(xp)
+
+    recent_completed = (
+        Quest.query
+        .filter_by(user_id=user.id, status="Completed")
+        .order_by(Quest.date_completed.desc(), Quest.id.desc())
+        .limit(8)
+        .all()
+    )
+
+    completed_count = Quest.query.filter_by(
+        user_id=user.id, status="Completed"
+    ).count()
+
+    rank = User.query.filter(User.xp > xp).count() + 1
+
+    return render_template(
+        "profile.html",
+        u=user,
+        xp=xp,
+        level=lvl,
+        title=level_title(lvl),
+        emoji=avatar_emoji(user.username),
+        xp_into=xp_into_level(xp),
+        xp_to_next=xp_to_next_level(xp),
+        completed_count=completed_count,
+        recent_completed=recent_completed,
+        rank=rank,
+        is_self=(user.id == current_user.id),
+    )
+
+
+@main.route("/search_users")
+@login_required
+def search_users():
+    q = (request.args.get("q") or "").strip().lower()
+    if not q:
+        return jsonify({"results": []})
+
+    matches = (
+        User.query
+        .filter(User.username.like(f"%{q}%"))
+        .order_by(User.xp.desc(), User.username.asc())
+        .limit(10)
+        .all()
+    )
+
+    results = []
+    for u in matches:
+        lvl = xp_to_level(u.xp)
+        results.append({
+            "username": u.username,
+            "xp": u.xp or 0,
+            "level": lvl,
+            "title": level_title(lvl),
+            "emoji": avatar_emoji(u.username),
+            "url": url_for("main.profile", username=u.username),
+        })
+    return jsonify({"results": results})

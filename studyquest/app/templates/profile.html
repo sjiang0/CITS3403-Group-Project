@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{% if is_self %}My Journal{% else %}{{ u.username }}'s Journal{% endif %} · Study Quest{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{% if is_self %}My Journal{% else %}{{ u.username }}'s Journal{% endif %}</h1>
+    <p class="page-subtitle">{% if is_self %}Your adventure log{% else %}Adventure log of a fellow scholar{% endif %}</p>
+  </div>
+  {% if not is_self %}
+    <div class="page-header-actions">
+      <a href="{{ url_for('main.leaderboard') }}" class="btn btn-outline">← Leaderboard</a>
+    </div>
+  {% endif %}
+</div>
+
+<div class="card card-honey card-flourish" style="margin-bottom:1.125rem">
+  <div style="display:flex;align-items:center;gap:1.125rem;flex-wrap:wrap">
+    <div style="width:3.375rem;height:3.375rem;border-radius:var(--radius-lg);
+                background:linear-gradient(135deg,var(--moss),var(--moss-mid));
+                display:flex;align-items:center;justify-content:center;
+                font-size:1.625rem;border:2px solid rgba(255,255,255,.15)">{{ emoji }}</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--bark-mid)">
+        {{ u.username }}
+      </div>
+      <div style="display:flex;align-items:center;gap:.5rem;margin-top:.2rem;flex-wrap:wrap">
+        <span class="badge badge-level" style="font-size:.7rem;padding:.18rem .55rem">Level {{ level }} · {{ title }}</span>
+        {% if u.last_active %}
+          <span style="font-size:.75rem;color:var(--bark-light);font-style:italic">
+            Last seen {{ u.last_active.strftime('%b %d, %Y') }}
+          </span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="divider-botanical" style="margin:.875rem 0">✿</div>
+
+  <div style="background:var(--moss-ghost);border:1px solid var(--moss-pale);
+              border-radius:var(--radius-md);padding:.7rem .875rem">
+    <div style="font-weight:700;font-size:.75rem;color:var(--moss);margin-bottom:.2rem">
+      ✦ Progress to Level {{ level + 1 }}
+    </div>
+    <div style="font-size:.75rem;color:var(--bark-light)">
+      <strong style="color:var(--bark-mid)">{{ xp_into }}</strong> / 100 XP this level —
+      <strong style="color:var(--bark-mid)">{{ xp_to_next }}</strong> XP to next level.
+    </div>
+    <div class="xp-big-bar xp-big-bar-spaced">
+      <div class="xp-big-fill" style="--xp-progress: {{ xp_into }}%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid-stats" style="margin-bottom:1.125rem">
+  <div class="stat-card"><span class="stat-icon">⚡</span><div class="stat-value">{{ xp }}</div><div class="stat-label">Total XP</div><div class="stat-bg">⚡</div></div>
+  <div class="stat-card"><span class="stat-icon">📜</span><div class="stat-value">{{ completed_count }}</div><div class="stat-label">Quests Done</div><div class="stat-bg">📜</div></div>
+  <div class="stat-card"><span class="stat-icon">🔥</span><div class="stat-value">{{ u.streak or 0 }}</div><div class="stat-label">Day Streak</div><div class="stat-bg">🔥</div></div>
+  <div class="stat-card"><span class="stat-icon">🏆</span><div class="stat-value">#{{ rank }}</div><div class="stat-label">Rank</div><div class="stat-bg">🏆</div></div>
+</div>
+
+<div class="section-title">Recently Completed</div>
+{% if recent_completed %}
+<div class="grid-quests">
+  {% for q in recent_completed %}
+    <div class="quest-item complete" data-difficulty="{{ q.difficulty }}" style="opacity:.7">
+      <button class="quest-check checked" disabled>✓</button>
+      <div class="quest-body">
+        <div class="quest-title">{{ q.title }}</div>
+        <div class="quest-meta">
+          <span class="badge badge-{{ q.difficulty }}">{{ q.difficulty|capitalize }}</span>
+          <span class="badge badge-complete">Complete</span>
+          {% if q.date_completed %}<span>{{ q.date_completed.strftime('%b %d') }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <span class="empty-state-icon">🌱</span>
+  <div class="empty-state-title">No quests completed yet</div>
+  <p class="empty-state-text">
+    {% if is_self %}Plant your first quest and start blooming!{% else %}This scholar hasn't completed any quests yet — give them time to bloom.{% endif %}
+  </p>
+  {% if is_self %}<a href="{{ url_for('main.create_quest') }}" class="btn btn-primary">+ Plant a Quest</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}
