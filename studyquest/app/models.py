@@ -81,11 +81,11 @@ class User(UserMixin, db.Model):
             date_completed=yesterday
         ).first() is not None
 
-        # Reset streak if last login before yesterday OR no completed quest yesterday
-        if self.last_active is None or self.last_active < yesterday or not completed_yesterday:
+        # Reset streak only if we haven't updated the streak today and no quest completed yesterday
+        if self.streak_last_updated != today and not completed_yesterday:
             self.streak = 0
 
-        # Update last_active to today (prevents multiple resets in same day)
+        # Update last_active to today 
         self.last_active = today
         db.session.commit()
 
