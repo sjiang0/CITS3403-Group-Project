@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -19,6 +22,11 @@ login_manager.login_view = "main.login"
 def create_app(config_class=DeploymentConfig):
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    if not app.config.get("SECRET_KEY"):
+        raise RuntimeError(
+            "SECRET_KEY is not set. Copy .env.example to .env and set a value."
+        )
 
     db.init_app(app)
     csrf.init_app(app)

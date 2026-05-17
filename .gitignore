@@ -19,3 +19,6 @@ Thumbs.db
 # database
 instance/
 app.db
+
+# environment variables
+.env
