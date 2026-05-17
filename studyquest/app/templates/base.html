@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Study Quest{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Flash Messages Container -->
+<div class="flash-container" id="flash-container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="{{ category }}">
+          <span class="flash-icon">
+            {% if 'success' in category %}✓{% elif 'error' in category %}✕{% elif 'warning' in category %}⚠{% else %}ℹ{% endif %}
+          </span>
+          <span class="flash-message">{{ message }}</span>
+          <button type="button" class="flash-close" onclick="this.parentElement.remove()">×</button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+{% if current_user.is_authenticated %}
+<!-- ═══════════════════════════════════════════════════════
+     AUTHENTICATED LAYOUT: Sidebar + Main Content
+     ═══════════════════════════════════════════════════════ -->
+
+<!-- Mobile Overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar">
+  <!-- Brand -->
+  <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">
+    <div class="brand-icon">🌸</div>
+    <div>
+      <div class="brand-name">Study Quest</div>
+      <div class="brand-tagline">bloom & grow</div>
+    </div>
+  </a>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Quest</div>
+    <a href="{{ url_for('main.dashboard') }}" class="nav-item {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+      <span class="nav-icon">🏡</span>
+      <span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('main.my_quests') }}" class="nav-item {% if request.endpoint == 'main.my_quests' %}active{% endif %}">
+      <span class="nav-icon">📜</span>
+      <span>My Quests</span>
+    </a>
+    <a href="{{ url_for('main.create_quest') }}" class="nav-item {% if request.endpoint == 'main.create_quest' %}active{% endif %}">
+      <span class="nav-icon">✨</span>
+      <span>Plant Quest</span>
+    </a>
+
+    <div class="nav-section-label" style="margin-top:.75rem">Community</div>
+    <a href="{{ url_for('main.leaderboard') }}" class="nav-item {% if request.endpoint == 'main.leaderboard' %}active{% endif %}">
+      <span class="nav-icon">🏆</span>
+      <span>Leaderboard</span>
+    </a>
+    <a href="{{ url_for('main.profile') }}" class="nav-item {% if request.endpoint == 'main.profile' and not username %}active{% endif %}">
+      <span class="nav-icon">👤</span>
+      <span>My Journal</span>
+    </a>
+  </nav>
+
+  <!-- Divider -->
+  <div class="sidebar-divider"></div>
+
+  <!-- Character Card -->
+  <a href="{{ url_for('main.profile') }}" class="char-card">
+    <div class="char-header">
+      <div class="char-avatar">{{ avatar }}</div>
+      <div class="char-info">
+          <div class="char-name">{{ current_user.username }}</div>
+          <div class="char-class">{{ level_name }}</div>
+      </div>
+      <div>
+        <span class="char-level-badge">Lv {{ user_level }}</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- Logout -->
+  <div class="sidebar-bottom">
+    <form action="{{ url_for('main.logout') }}" method="POST" style="margin:0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="sidebar-logout" style="width:100%;background:none;border:none;text-align:left;cursor:pointer">
+        <span class="nav-icon">🚪</span>
+        <span>Sign Out</span>
+      </button>
+    </form>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main id="main-content">
+  <!-- Mobile Top Bar -->
+  <div class="mobile-topbar">
+    <button class="mobile-menu-btn" id="mobile-menu-btn" type="button">☰</button>
+    <span class="mobile-brand-text">Study Quest</span>
+    <div style="width:1.25rem"></div>
+  </div>
+
+{% else %}
+
+<!-- ═══════════════════════════════════════════════════════
+     UNAUTHENTICATED LAYOUT: Full-width content only
+     ═══════════════════════════════════════════════════════ -->
+<main style="width:100%;min-height:100vh;position:relative;z-index:1">
+
+{% endif %}
+
+  {% block content %}{% endblock %}
+
+</main>
+
+<!-- Base Scripts -->
+{% block extra_js %}{% endblock %}
+</body>
+</html>
