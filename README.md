@@ -69,11 +69,19 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Set a secret key (or use a `.env` file in the repo root):
+Copy `.env.example` to `.env` in the repo root and set a secret key:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` so `SECRET_KEY` is something long and random:
 
 ```
 SECRET_KEY=anything-long-and-random
 ```
+
+The app loads `.env` automatically and will refuse to start if `SECRET_KEY` is not set.
 
 Then from inside `studyquest/`:
 
