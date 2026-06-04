@@ -1,0 +1,319 @@
+/* ============================================================
+   STUDY QUEST — Landing Page Styles
+   Append this to the existing style.css file
+   ============================================================ */
+
+/* ── LANDING PAGE LAYOUT ──────────────────────────────────── */
+.landing-page {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.landing-container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* ── HERO SECTION ─────────────────────────────────────────── */
+.landing-hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, var(--parchment) 0%, var(--cream) 100%);
+}
+
+.hero-content {
+  max-width: 680px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-icon {
+  font-size: 4rem;
+  line-height: 1;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  filter: drop-shadow(0 4px 12px rgba(194, 72, 120, 0.25));
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-weight: 700;
+  color: var(--bark-mid);
+  margin-bottom: 0.75rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.hero-tagline {
+  font-family: var(--font-display);
+  font-size: clamp(1.125rem, 3vw, 1.5rem);
+  color: var(--moss);
+  font-style: italic;
+  margin-bottom: 1.25rem;
+  font-weight: 600;
+}
+
+.hero-description {
+  font-size: var(--text-lg);
+  color: var(--bark-light);
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ── FEATURES SECTION ─────────────────────────────────────── */
+.landing-features {
+  padding: 5rem 2rem;
+  background: var(--cream);
+  position: relative;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1140px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.feature-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--bark-mid);
+  margin-bottom: 0.625rem;
+}
+
+.feature-description {
+  font-size: var(--text-sm);
+  color: var(--bark-light);
+  line-height: 1.6;
+}
+
+/* ── HOW IT WORKS SECTION ─────────────────────────────────── */
+.landing-how-it-works {
+  padding: 5rem 2rem;
+  background: var(--parchment);
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.step-card {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  position: relative;
+}
+
+.step-number {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--moss), var(--moss-mid));
+  color: white;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 4px 12px rgba(194, 72, 120, 0.3);
+}
+
+.step-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--bark-mid);
+  margin-bottom: 0.625rem;
+}
+
+.step-description {
+  font-size: var(--text-sm);
+  color: var(--bark-light);
+  line-height: 1.6;
+}
+
+/* ── CTA SECTION ──────────────────────────────────────────── */
+.landing-cta {
+  padding: 5rem 2rem;
+  background: var(--cream);
+}
+
+.cta-content {
+  text-align: center;
+  padding: 3.5rem 2rem;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 5vw, 2.5rem);
+  font-weight: 700;
+  color: var(--bark-mid);
+  margin-bottom: 1rem;
+}
+
+.cta-description {
+  font-size: var(--text-lg);
+  color: var(--bark-light);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── FOOTER ───────────────────────────────────────────────── */
+.landing-footer {
+  padding: 2.5rem 2rem;
+  background: var(--parchment);
+  border-top: 1px solid var(--parchment-dark);
+}
+
+/* ── RESPONSIVE ADJUSTMENTS ───────────────────────────────── */
+@media (max-width: 768px) {
+  .landing-hero {
+    min-height: 90vh;
+    padding: 3rem 1.5rem;
+  }
+
+  .hero-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .hero-cta {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .hero-cta .btn {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .landing-features,
+  .landing-how-it-works,
+  .landing-cta {
+    padding: 3rem 1.5rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .landing-container {
+    padding: 0 1.5rem;
+  }
+}
+
+/* ── ANIMATIONS ────────────────────────────────────────────── */
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loaded .hero-content {
+  animation: fade-slide-up 0.8s ease-out 0.2s both;
+}
+
+/* Stagger feature card animations */
+@media (prefers-reduced-motion: no-preference) {
+  .feature-card.animate-in {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  
+  .feature-card.animate-in.visible {
+    animation: fade-slide-up 0.6s ease-out forwards;
+  }
+  
+  .feature-card.animate-in.delay-1.visible {
+    animation-delay: 0.1s;
+  }
+  
+  .feature-card.animate-in.delay-2.visible {
+    animation-delay: 0.2s;
+  }
+  
+  .feature-card.animate-in.delay-3.visible {
+    animation-delay: 0.3s;
+  }
+  
+  .feature-card.animate-in.delay-4.visible {
+    animation-delay: 0.4s;
+  }
+  
+  .feature-card.animate-in.delay-5.visible {
+    animation-delay: 0.5s;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .float-anim,
+  .animate-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
